@@ -1,0 +1,170 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.476) 0%,
+      rgba(0, 0, 0, 0.476) 100%
+    ),
+    url("../../img/home/home5.jpg");
+  /* Cambia la URL de la imagen de fondo según tu estructura de carpetas */
+  background-size: cover;
+  background-position: center;
+}
+
+.login-container {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.logo img {
+  max-width: 130px; /* Ajusta el tamaño del logo */
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #39a900;
+  box-shadow: 0 0 5px rgba(69, 179, 0, 0.3);
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #39a900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #266f01;
+}
+
+.text-center {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.text-center a {
+  color: #39a900;
+  text-decoration: none;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+/* Transición y animación */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.5s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-container.slide-up {
+  transform: translateY(-100%);
+}
+
+.form-container.slide-down {
+  transform: translateY(0);
+}
+
+/* Escondemos los formularios hasta que se activen */
+#forgot-password-form,
+#register-form {
+  display: none;
+}
+
+#forgot-password-form.active,
+#register-form.active {
+  display: block;
+}
+
+#login-form {
+  display: block;
+}
+
+
+.jconfirm{
+  width: 60%;
+    display: flex;  /* Activa flexbox */
+    justify-content: center;  /* Centra horizontalmente */
+    align-items: center;  /* Centra verticalmente */
+    height: 100vh;  /* Ajusta la altura a la pantalla completa */
+    margin: auto;  /* Centra horizontalmente si el contenedor no es de ancho completo */
+ 
+}
+
+
+/* Contenedor del input y el ícono */
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Estilo del input */
+.input-container input {
+  width: 100%;
+  padding-right: 40px; /* Espacio para el ícono */
+}
+
+/* Estilo del ícono */
+.input-container i {
+  position: absolute;
+  top: 50%;
+  right: 10px; /* Espaciado desde el borde derecho */
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+}

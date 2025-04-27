@@ -1,0 +1,125 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.476) 0%,
+      rgba(0, 0, 0, 0.476) 100%
+    ),
+    url("../../img/home/home5.jpg"); /* Cambia la URL de la imagen de fondo según tu estructura de carpetas */
+  background-size: cover;
+  background-position: center;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.85); /* Fondo blanco con opacidad para que se vea un poco la imagen de fondo */
+  padding: 40px;
+  border-radius: 10px; /* Bordes redondeados para la caja */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra suave alrededor de la caja */
+  max-width: 450px;
+  width: 100%;
+  border: 2px solid #39a900; /* Borde verde alrededor de la caja */
+  text-align: center; /* Centra los contenidos dentro de la caja */
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #555; /* Color gris oscuro para las etiquetas */
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%; /* Hace que el input ocupe todo el ancho disponible */
+  max-width: 350px; /* Limita el ancho máximo del input */
+  margin: 0 auto 50px auto; /* Centra el input */
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd; /* Borde gris claro */
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #39a900; /* Borde verde cuando está enfocado */
+  box-shadow: 0 0 5px rgba(69, 179, 0, 0.3); /* Sombra verde suave */
+}
+
+.btn {
+  width: 100%;
+  max-width: 350px; /* Limita el ancho máximo del botón */
+  padding: 12px;
+  background-color: #39a900; /* Fondo verde */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 0 auto; /* Centra el botón */
+}
+
+.btn:hover {
+  background-color: #2e8b00; /* Tono más oscuro de verde cuando se pasa el ratón por encima */
+}
+
+.text-center {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.text-center a {
+  color: #39a900;
+  text-decoration: none;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+/* Para mantener la estructura del formulario centrada y limpia */
+.FormRecCon {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center; /* Centra todos los elementos dentro del formulario */
+}
+h2 {
+  color: #39a900; /* Cambia este color según tu preferencia */
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mensaje-alerta {
+  background-color: #d4edda;
+  /* Color de éxito */
+  color: #155724;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.mensaje-alerta.error {
+  background-color: #f8d7da;
+  /* Color de error */
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}

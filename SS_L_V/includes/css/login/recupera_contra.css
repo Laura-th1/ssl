@@ -1,0 +1,103 @@
+/* Reset de márgenes y padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Roboto", sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.476) 0%,
+      rgba(0, 0, 0, 0.476) 100%
+    ),
+    url("../../img/home/home5.jpg"); /* Cambia la URL de la imagen de fondo según tu estructura de carpetas */
+  background-size: cover;
+  background-position: center;
+}
+.FormRecCon {
+  background-color: rgba(255, 255, 255, 0.85); /* Fondo blanco con opacidad para que se vea un poco la imagen de fondo */
+  padding: 40px;
+  border-radius: 10px; /* Bordes redondeados para la caja */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra suave alrededor de la caja */
+  max-width: 450px;
+  width: 100%;
+  border: 2px solid #39a900; /* Borde verde alrededor de la caja */
+  text-align: center; /* Centra los contenidos dentro de la caja */
+}
+
+
+
+.FormRecCon input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.FormRecCon input:focus {
+  border-color: #39a900; /* Borde verde cuando está enfocado */
+  box-shadow: 0 0 5px rgba(69, 179, 0, 0.3); /* Sombra verde suave */
+}
+
+.FormRecCon .btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #39a900; /* Fondo verde */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.FormRecCon .btn:hover {
+  background-color: #266f01; /* Verde más oscuro en hover */
+}
+
+/* Opcional: Animación de enfoque */
+input:focus, .btn:hover {
+  transition: all 0.3s ease;
+}
+
+h2 {
+  color: #39a900; /* Cambia este color según tu preferencia */
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Contenedor del input y el ícono */
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Estilo del input */
+.input-container input {
+  width: 100%;
+  padding-right: 40px; /* Espacio para el ícono */
+}
+
+/* Estilo del ícono */
+.input-container i {
+  position: center;
+  top: 50%;
+  right: 10px; /* Espaciado desde el borde derecho */
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+ 
+}
+

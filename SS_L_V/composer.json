@@ -1,0 +1,21 @@
+{
+    "name": "luis/sslv",
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "require-dev": {
+        "swiftmailer/swiftmailer": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Luis\\Sslv\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Luis-galvis",
+            "email": "lgalvismoreno@gmail.com"
+        }
+    ]
+}
