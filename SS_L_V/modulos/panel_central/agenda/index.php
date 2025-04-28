@@ -630,9 +630,9 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                 icon: 'exportxlsx',
                                 text: 'Exportar a Excel',
                                 onClick: function() {
-                                    const grid = $("#tablaDepartamentos").dxDataGrid("instance");
+                                    const grid = $("#tablaAgendamientos").dxDataGrid("instance");
                                     const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Departamentos');
+                                    const worksheet = workbook.addWorksheet('Agenda');
 
                                     DevExpress.excelExporter.exportDataGrid({
                                         component: grid,
@@ -641,7 +641,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         workbook.xlsx.writeBuffer().then(buffer => {
                                             saveAs(new Blob([buffer], {
                                                 type: 'application/octet-stream'
-                                            }), 'Departamentos.xlsx');
+                                            }), 'Agendamientos.xlsx');
                                         });
                                     });
                                 }
@@ -654,9 +654,9 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                 icon: 'export',
                                 text: 'Exportar a CSV',
                                 onClick: function() {
-                                    const grid = $("#tablaDepartamentos").dxDataGrid("instance");
+                                    const grid = $("#tablaAgendamientos").dxDataGrid("instance");
                                     const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Departamentos');
+                                    const worksheet = workbook.addWorksheet('Agenda');
 
                                     DevExpress.excelExporter.exportDataGrid({
                                         component: grid,
@@ -665,7 +665,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         workbook.csv.writeBuffer().then(buffer => {
                                             saveAs(new Blob([buffer], {
                                                 type: 'text/csv'
-                                            }), 'Departamentos.csv');
+                                            }), 'Agendamientos.csv');
                                         });
                                     });
                                 }

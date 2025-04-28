@@ -588,16 +588,65 @@ function TBInventarios(data) {
                 allowUpdating: false,
                 allowAdding: false,
                 allowDeleting: false
-            }
-        });
-    } else {
-        console.error("La propiedad 'DATA' está vacía o no existe.");
-    }
-}
+            }, 
+            toolbar: {
+                    items: [{
+                            widget: 'dxButton',
+                            options: {
+                                icon: 'exportxlsx',
+                                text: 'Exportar a Excel',
+                                onClick: function() {
+                                    const grid = $("#tablaInventarios").dxDataGrid("instance");
+                                    const workbook = new ExcelJS.Workbook();
+                                    const worksheet = workbook.addWorksheet('Inventarios');
+
+                                    DevExpress.excelExporter.exportDataGrid({
+                                        component: grid,
+                                        worksheet: worksheet
+                                    }).then(() => {
+                                        workbook.xlsx.writeBuffer().then(buffer => {
+                                            saveAs(new Blob([buffer], {
+                                                type: 'application/octet-stream'
+                                            }), 'Inventarios.xlsx');
+                                        });
+                                    });
+                                }
+                            },
+                            location: 'after'
+                        },
+                        {
+                            widget: 'dxButton',
+                            options: {
+                                icon: 'export',
+                                text: 'Exportar a CSV',
+                                onClick: function() {
+                                    const grid = $("#tablaInventarios").dxDataGrid("instance");
+                                    const workbook = new ExcelJS.Workbook();
+                                    const worksheet = workbook.addWorksheet('Inventarios');
+
+                                    DevExpress.excelExporter.exportDataGrid({
+                                        component: grid,
+                                        worksheet: worksheet
+                                    }).then(() => {
+                                        workbook.csv.writeBuffer().then(buffer => {
+                                            saveAs(new Blob([buffer], {
+                                                type: 'text/csv'
+                                            }), 'Inventarios.csv');
+                                        });
+                                    });
+                                }
+                            },
+                            location: 'after'
+                        }
+                    ]
+                }
+            });
+        }}
+    
 
 // Función para cargar la tabla con los datos de la API
 $(document).ready(() => {
-    consultas('Inventarios'); // Reemplazamos 'inventarioDummy' por la llamada real a la API
+    consultas('Inventarios'); // Llamamos a la función para cargar los datos al inicio
 });
 
 function consultas(accion) {

@@ -270,6 +270,12 @@ function CrearNueva() {
                             </div>
                             <div class="col-md-12" id="div_nickname">
                                 <div class="form-group">
+                                    <label for="nickname">N° de placa:</label>
+                                    <input type="text" class="form-control text-dark bg-white" id="numero_placa" name="numero_placa" placeholder="Ingrese el numero de placa del articulo" required />
+                                </div>
+                            </div>
+                            <div class="col-md-12" id="div_nickname">
+                                <div class="form-group">
                                     <label for="nickname">Observacion:</label>
                                     <textarea class="form-control text-dark bg-white" id="observacion" name="observacion" placeholder="Ingrese una observacion" required ></textarea>
                                 </div>
@@ -301,6 +307,7 @@ function CrearNueva() {
                 btnClass: 'btn btn-green',
                 action: function(saveButton) {
                     var nombre = $("#nombre").val();
+                    var numero_placa = $("#numero_placa").val();
                     var observacion = $("#observacion").val();
                     var documento = $("#documento").val();
                     var nombre_usuario = $("#nombre_usuario").val();
@@ -315,7 +322,7 @@ function CrearNueva() {
 
                     requisitos("POST",
                         "../../../peticiones_json/panel_central/productos/productos_json.php",
-                        "opcion=AccionInsertar&nombre=" + nombre + "&observacion=" + observacion + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
+                        "opcion=AccionInsertar&nombre=" + nombre +"&numero_placa=" + numero_placa + "&observacion=" + observacion + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
                         function(data) {
                             if (data["ALERTA"] == 'OK') {
                                 consultas("Productos");
@@ -370,7 +377,7 @@ function CrearNueva() {
     });
 }
 
-function Editar(id, nombre, observacion, estado, documento, nombre_usuario, usuario_id) {
+function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre_usuario, usuario_id) {
     crear = $.confirm({
         title: 'Editar Articulo',
         backgroundDismiss: false,
@@ -383,6 +390,12 @@ function Editar(id, nombre, observacion, estado, documento, nombre_usuario, usua
                                 <div class="form-group">
                                     <label for="nickname">Nombre:</label>
                                     <input type="text" class="form-control text-dark bg-white" id="nombre" name="nombre" placeholder="" value="${nombre}" required />
+                                </div>
+                            
+                            <div class="col-md-12" id="div_nickname">
+                                <div class="form-group">
+                                    <label for="nickname">N° de placa:</label>
+                                    <input type="text" class="form-control text-dark bg-white" id="numero_placa" name="numero_placa" placeholder="" value="${numero_placa}" required />
                                 </div>
                             </div>
                             <div class="col-md-12" id="div_nickname">
@@ -431,6 +444,7 @@ function Editar(id, nombre, observacion, estado, documento, nombre_usuario, usua
                 btnClass: 'btn btn-green',
                 action: function(saveButton) {
                     var nombre = $("#nombre").val();
+                    var numero_placa = $("#numero_placa").val();
                     var observacion = $("#observacion").val();
                     var estado_new = $('input[name="estado"]:checked').val();
                     var documento = $("#documento").val();
@@ -446,7 +460,7 @@ function Editar(id, nombre, observacion, estado, documento, nombre_usuario, usua
 
                     requisitos("POST",
                         "../../../peticiones_json/panel_central/productos/productos_json.php",
-                        "opcion=AccionActualizar&id=" + id + "&nombre=" + nombre + "&observacion=" + observacion + "&estado=" + estado_new + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
+                        "opcion=AccionActualizar&id=" + id + "&nombre=" + nombre +"&numero_placa=" + numero_placa + "&observacion=" + observacion + "&estado=" + estado_new + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
                         function(data) {
                             if (data["ALERTA"] == 'OK') {
                                 consultas("Productos");
@@ -522,6 +536,11 @@ function TBProductos(data) {
                 caption: 'Nombre'
             },
             {
+                dataField: 'NUMERO_PLACA',
+                caption: 'N° de Placa'
+            },
+            
+            {
                 dataField: 'OBSERVACION',
                 caption: 'Observacion'
             },
@@ -538,7 +557,7 @@ function TBProductos(data) {
                 cellTemplate: function(container, options) {
                     if (rolPermitido) {
                         $(`<td>
-                            <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.DESCRIPCION}', '${options.data.OBSERVACION}', ${options.data.ESTADO_INT}, '${options.data.DOCUMENTO || ''}', '${options.data.USUARIO}', ${options.data.USUARIO_ID || 0});"> 
+                            <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.DESCRIPCION}', '${options.data.NUMERO_PLACA}', '${options.data.OBSERVACION}', ${options.data.ESTADO_INT}, '${options.data.DOCUMENTO || ''}', '${options.data.USUARIO}', ${options.data.USUARIO_ID || 0});"> 
                                 Editar
                             </button>
                         </td>`).appendTo(container);

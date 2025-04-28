@@ -41,6 +41,7 @@ elseif ($_POST['opcion'] == 'AccionConsultar') {
                     "NUMERO"            => $numero,
                     "ID"                => $datos["id"],
                     "DESCRIPCION"       => $datos["descripcion"],
+                    "NUMERO_PLACA"      => $datos["numero_placa"],
                     "OBSERVACION"       => $datos["observacion"],
                     "ESTADO"            => ($datos["estado"] == 1) ? "Activo" : "Inactivo",
                     "ESTADO_INT"        => $datos["estado"],
@@ -56,6 +57,7 @@ elseif ($_POST['opcion'] == 'AccionConsultar') {
 // Insertar producto
 elseif ($_POST['opcion'] == 'AccionInsertar') {
     $nombre = $_POST["nombre"];
+    $numero_placa = $_POST["numero_placa"];
     $observacion = $_POST["observacion"];
     $usuario_id = $_POST["usuario_id"];  // ID del usuario que crea el producto
 
@@ -66,8 +68,8 @@ elseif ($_POST['opcion'] == 'AccionInsertar') {
         $alerta = "OK";
         $mensaje = "";
 
-        $consulta = "INSERT INTO productos (descripcion, observacion, estado, usuario_create, usuario_id, usuario_act, fecha_create, fecha_act)
-                        VALUES ('".$nombre."', '".$observacion."', 1, 1, '".$usuario_id."', NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
+        $consulta = "INSERT INTO productos (descripcion, numero_placa, observacion, estado, usuario_create, usuario_id, usuario_act, fecha_create, fecha_act)
+                        VALUES ('".$nombre."','".$numero_placa."', '".$observacion."', 1, 1, '".$usuario_id."', NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
         $data = $con->query($consulta);
     } else {
         $alerta = "ERROR";
@@ -81,6 +83,7 @@ elseif ($_POST['opcion'] == 'AccionInsertar') {
 elseif ($_POST['opcion'] == 'AccionActualizar') {
     $id = $_POST["id"];
     $nombre = $_POST["nombre"];
+    $numero_placa = $_POST["numero_placa"];
     $observacion = $_POST["observacion"];
     $estado = $_POST["estado"];
     $usuario_id = $_POST["usuario_id"];  // ID del usuario que actualiza el producto
@@ -94,6 +97,7 @@ elseif ($_POST['opcion'] == 'AccionActualizar') {
 
         $consulta = "UPDATE productos
                         SET descripcion = '".$nombre."',
+                            numero_placa = '".$numero_placa."',
                             observacion = '".$observacion."',
                             estado = '".$estado."',
                             usuario_id = '".$usuario_id."',
