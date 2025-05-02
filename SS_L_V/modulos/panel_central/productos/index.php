@@ -655,7 +655,56 @@ function TBProductos(data) {
                                 }
                             },
                             location: 'after'
-                        },
+                        },{
+    widget: 'dxButton',
+    options: {
+        icon: 'upload',
+        text: 'Importar CSV',
+        onClick: function() {
+            // Crear un input para seleccionar el archivo CSV
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+
+            // Evento para manejar el archivo seleccionado
+            input.addEventListener('change', function(event) {
+                const file = event.target.files[0]; // Obtener el archivo seleccionado
+
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('csv_file', file); // Use 'csv_file' here
+                    formData.append('import_data', true);
+
+                    // Enviar el archivo al servidor
+                    fetch("../../../peticiones_json/panel_central/productos/import.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Respuesta del servidor:", data); // Depuración
+                        if (data.status === "success") {
+                            alert("Datos importados correctamente.");
+                            consultas("Productos"); // Actualizar la tabla
+                        } else {
+                            alert("Error al importar los datos: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al enviar datos:", error);
+                        alert("Error al importar los datos.");
+                    });
+                } else {
+                    alert("No se seleccionó ningún archivo.");
+                }
+            });
+
+            // Simular un clic para abrir el selector de archivos
+            input.click();
+        }
+    },
+    location: 'after'
+}
                     ]
                 }
             });
@@ -677,6 +726,53 @@ function consultas(opc) {
     );
 }
 
+// Button configuration for CSV import
+var importCsvOption = {
+    icon: 'import',
+    text: 'Importar CSV',
+    onClick: function() {
+        // Crear un input para seleccionar el archivo CSV
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+
+        // Evento para manejar el archivo seleccionado
+        input.addEventListener('change', function(event) {
+            const file = event.target.files[0]; // Obtener el archivo seleccionado
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('csv_file', file); // Use 'csv_file' here
+                formData.append('import_data', true);
+
+                // Enviar el archivo al servidor
+                fetch("../../../peticiones_json/panel_central/productos/import.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data); // Depuración
+                    if (data.status === "success") {
+                        alert("Datos importados correctamente.");
+                        consultas("Productos"); // Actualizar la tabla by calling the existing function
+                    } else {
+                        alert("Error al importar los datos: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al enviar datos:", error);
+                    alert("Error al importar los datos.");
+                });
+            } else {
+                alert("No se seleccionó ningún archivo.");
+            }
+        });
+
+        // Simular un clic para abrir el selector de archivos
+        input.click();
+    }
+};
 
 function cerrarSesion(event) {
     event.preventDefault();

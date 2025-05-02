@@ -36,7 +36,7 @@ if (!isset($_SESSION['ROL'])) {
 // Verifica si el rol del usuario está permitido
 $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico', 'Administrador']);
 ?>
-
+?>
 
 
 <!DOCTYPE html>
@@ -171,7 +171,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         <div class="btn-wrapper">
                         <?php if ($rolPermitido): ?>
 
-                            <a href="#" class="btn text-white me-0" style="background-color: #39a900; color: #ffffff;" onclick="CrearNueva();"><i class="icon-download"></i> Asignar Productos</a>
+                            <a href="#" class="btn text-white me-0" style="background-color: #39a900; color: #ffffff;" onclick="CrearNueva();"><i class="icon-download"></i> Asignar Articulos</a>
                             <?php endif; ?>
 
                         </div>
@@ -239,20 +239,11 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label for="producto">Articulo:</label>
+                                                <label for="producto">Articulos:</label>
                                                 <select class="form-control text-dark bg-white" id="producto" name="producto">
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-12" id="div_nombre_usuario">
-                                <div class="form-group">
-                                    <label for="usuario">Usuario:</label>
-                                    <input type="text" class="form-control text-dark bg-white" id="usuario" name="usuario" placeholder="Usuario" readonly required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="numero_placa">N° de placa:</label>
-                                    <input type="text" class="form-control text-dark bg-white" id="numero_placa" name="numero_placa" placeholder="Numero de placa" readonly required />
-                                </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="nombre">Cantidad:</label>
@@ -279,7 +270,6 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         text: 'Guardar',
                         btnClass: 'btn btn-green',
                         action: function(saveButton){
-                            
                             var cantidad = $("#cantidad").val();
                             var observacion = $("#observacion").val();
                             
@@ -384,16 +374,8 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         width: 100
                     },
                     {
-                        caption: 'Producto',
+                        caption: 'Articulo',
                         dataField: 'PROD_DES',
-                    },
-                    {
-                        caption: 'N° de Placa',
-                        dataField: 'NUMERO_PLACA',
-                    },
-                    {
-                        caption: 'Usuario',
-                        dataField: 'USUARIO',
                     },
                     {
                         caption: 'Cantidad',
@@ -402,7 +384,15 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                     {
                         caption: 'Observacion',
                         dataField: 'OBSERVACION',
+                    },{
+                        caption: 'Nº de Placa', 
+                        dataField: 'NUMERO_PLACA', 
                     },
+                     {
+                        caption: 'Usuario', 
+                        dataField: 'USUARIO_ID', 
+                     },
+
                     {
                         dataField: '',
                         caption: 'Acciones',
@@ -478,10 +468,9 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         worksheet: worksheet
                                     }).then(() => {
                                         workbook.xlsx.writeBuffer().then(buffer => {
-                                            // Guardar el archivo Excel
                                             saveAs(new Blob([buffer], {
                                                 type: 'application/octet-stream'
-                                            }), 'InventarioAmbientes.xlsx');
+                                            }), 'Inventarios.xlsx');
                                         });
                                     });
                                 }
@@ -505,7 +494,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         workbook.csv.writeBuffer().then(buffer => {
                                             saveAs(new Blob([buffer], {
                                                 type: 'text/csv'
-                                            }), 'InventarioAmbiente.csv');
+                                            }), 'Inventarios.csv');
                                         });
                                     });
                                 }
@@ -532,7 +521,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                     formData.append('import_data', true);
 
                     // Enviar el archivo al servidor
-                    fetch("../../../../peticiones_json/panel_central/inventarios/imp_inventario.php", {
+                    fetch("../../../../peticiones_json/panel_central/inventarios/import.php", {
                         method: "POST",
                         body: formData
                     })
@@ -541,7 +530,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         console.log("Respuesta del servidor:", data); // Depuración
                         if (data.status === "success") {
                             alert("Datos importados correctamente.");
-                            consultas("Ambientes"); // Actualizar la tabla
+                            consultas("Inventarios"); // Actualizar la tabla
                         } else {
                             alert("Error al importar los datos: " + data.message);
                         }
@@ -591,6 +580,54 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 );
             }
         }
+
+          // Button configuration for CSV import
+var importCsvOption = {
+    icon: 'import',
+    text: 'Importar CSV',
+    onClick: function() {
+        // Crear un input para seleccionar el archivo CSV
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+
+        // Evento para manejar el archivo seleccionado
+        input.addEventListener('change', function(event) {
+            const file = event.target.files[0]; // Obtener el archivo seleccionado
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('csv_file', file); // Use 'csv_file' here
+                formData.append('import_data', true);
+
+                // Enviar el archivo al servidor
+                fetch("../../../../peticiones_json/panel_central/inventarios/import.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data); // Depuración
+                    if (data.status === "success") {
+                        alert("Datos importados correctamente.");
+                        consultas("Inventarios"); // Actualizar la tabla by calling the existing function
+                    } else {
+                        alert("Error al importar los datos: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al enviar datos:", error);
+                    alert("Error al importar los datos.");
+                });
+            } else {
+                alert("No se seleccionó ningún archivo.");
+            }
+        });
+
+        // Simular un clic para abrir el selector de archivos
+        input.click();
+    }
+};
 
         function Eliminar(id){
             requisitos("POST",

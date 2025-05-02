@@ -120,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // As
             "insertados" => $insertados,
             "actualizados" => $actualizados,
             "omitidos" => $omitidos
+            
         ]);
     } else {
         echo json_encode(["status" => "error", "message" => "Error al abrir el archivo CSV."]);

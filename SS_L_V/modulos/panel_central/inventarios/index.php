@@ -461,6 +461,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
             content: 'Inventario actualizado correctamente',
             type: 'green'
         });
+        location.reload(); // Recargar la página para reflejar los cambios
     } else {
         $.alert({
             title: 'Error',

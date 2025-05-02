@@ -14,57 +14,56 @@ if (!$con) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // Assuming your file input has the name 'csv_file'
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // Verificar si se cargó un archivo CSV
     $file = $_FILES['csv_file'];
 
-    // Check for upload errors
+    // Verificar errores en la carga del archivo
     if ($file['error'] !== UPLOAD_ERR_OK) {
         echo json_encode(["status" => "error", "message" => "Error al cargar el archivo."]);
         exit;
     }
 
-    // Check file type (optional, but recommended)
+    // Verificar el tipo de archivo (opcional, pero recomendado)
     if ($file['type'] !== 'text/csv' && $file['type'] !== 'application/vnd.ms-excel') {
         echo json_encode(["status" => "error", "message" => "Formato de archivo no válido. Se esperaba un archivo CSV."]);
         exit;
     }
 
-    // Open the uploaded CSV file
+    // Abrir el archivo CSV cargado
     if (($handle = fopen($file['tmp_name'], "r")) !== FALSE) {
         $insertados = 0;
         $actualizados = 0;
         $omitidos = 0;
         $row_number = 0;
 
-        // Read the CSV file line by line
+        // Leer el archivo CSV línea por línea
         while (($row_data = fgetcsv($handle)) !== FALSE) {
             $row_number++;
 
-            // Skip the header row (if it exists)
+            // Saltar la fila de encabezado (si existe)
             if ($row_number === 1) {
-                continue; // Or process it if needed
+                continue;
             }
 
-            // Assuming your CSV columns are in a specific order:
-            // id, bloque_id, descripcion, observacion, estado
-            if (count($row_data) !== 5) {
+            // Suponiendo que las columnas del CSV están en el siguiente orden:
+            // id, descripcion, tipo_titulacion_id, estado
+            if (count($row_data) !== 4) {
                 echo json_encode(["status" => "error", "message" => "Número incorrecto de columnas en la fila " . $row_number . "."]);
                 fclose($handle);
                 exit;
             }
 
             $id = intval($row_data[0]);
-            $bloque_id = intval($row_data[1]);
-            $descripcion = $con->real_escape_string($row_data[2]);
-            $observacion = $con->real_escape_string($row_data[3]);
-            $estado = intval($row_data[4]);
+            $descripcion = $con->real_escape_string($row_data[1]);
+            $tipo_titulacion_id = intval($row_data[2]);
+            $estado = intval($row_data[3]);
             $fecha_actual = date('Y-m-d H:i:s');
 
             // Verificar duplicado lógico
             $sql_duplicado = "
-                SELECT id FROM ambientes
+                SELECT id FROM titulaciones
                 WHERE descripcion = '$descripcion'
-                  AND bloque_id = $bloque_id
+                  AND tipo_titulacion_id = $tipo_titulacion_id
                   AND id != $id
             ";
             $res_duplicado = mysqli_query($con, $sql_duplicado);
@@ -75,16 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // As
             }
 
             // Verificar si el ID existe
-            $sql_existencia = "SELECT id FROM ambientes WHERE id = $id";
+            $sql_existencia = "SELECT id FROM titulaciones WHERE id = $id";
             $result = mysqli_query($con, $sql_existencia);
 
             if (mysqli_num_rows($result)) {
                 // Actualizar
                 $sql_update = "
-                    UPDATE ambientes SET
-                        bloque_id = $bloque_id,
+                    UPDATE titulaciones SET
                         descripcion = '$descripcion',
-                        observacion = '$observacion',
+                        tipo_titulacion_id = $tipo_titulacion_id,
                         estado = $estado,
                         usuario_act = 1,
                         fecha_act = '$fecha_actual'
@@ -99,10 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // As
             } else {
                 // Insertar
                 $sql_insert = "
-                    INSERT INTO ambientes
-                        (id, bloque_id, descripcion, observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
+                    INSERT INTO titulaciones
+                        (descripcion, tipo_titulacion_id, estado, usuario_create, usuario_act, fecha_create, fecha_act)
                     VALUES
-                        ($id, $bloque_id, '$descripcion', '$observacion', $estado, 1, 1, '$fecha_actual', '$fecha_actual')
+                        ('$descripcion', $tipo_titulacion_id, $estado, 1, 1, '$fecha_actual', '$fecha_actual')
                 ";
                 if (!mysqli_query($con, $sql_insert)) {
                     echo json_encode(["status" => "error", "message" => "Error al insertar en la fila " . $row_number . ": " . mysqli_error($con)]);

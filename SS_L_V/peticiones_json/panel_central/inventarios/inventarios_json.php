@@ -6,7 +6,6 @@ $con = conectar();
 $alerta = "";
 $mensaje = "";
 
-// Consultar todos los productos
 if ($_POST['opcion'] == 'AccionConsultar') {
     if ($_POST['accion'] == 'ConsultarTodos') {
         $data = [];
@@ -23,8 +22,6 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                     INNER JOIN bloques bloq ON (bloq.id = inv.bloque_id)";
         $data_con = $con->query($consulta);
 
-    
-
         if ($data_con->num_rows > 0) {
             foreach ($data_con as $datos) {
                 $data[] = array(
@@ -40,7 +37,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                 $numero++;
             }
         }
-      
+
         print json_encode(array("DATA" => $data));
     } elseif ($_POST['accion'] == 'ConsultarBloques') {
         $data = [];
@@ -78,7 +75,6 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                         WHERE dat_inv.inventario_id = ".$id_inv;
         $data_con 				=								$con->query($consulta);
 
-
         if($data_con->num_rows > 0){
             foreach($data_con as $datos){
                 $data[] = array(
@@ -94,7 +90,6 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                 $numero++;
             }
         }
-
 
         print json_encode(array("DATA" => $data));
     } elseif ($_POST['accion'] == 'ConsultarProductos') {
@@ -156,38 +151,12 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                         and inventario_id = ".$id_inv."";
     $data_con 				=								$con->query($consulta);
 
-    
- // Obtener usuario por número de documento
- if ($_POST['opcion'] == 'ObtenerUsuario&NumeroplacaPorProducto') {
-    $id_producto = $_POST['producto'];
-    
-    $respuesta = array("ALERTA" => "ERROR", "MENSAJE" => "Artículo no encontrado.");
-
-    // Consultar la tabla de artículos para obtener el nombre de usuario y la placa
-    $consulta_producto = "SELECT usuario, numero_placa FROM productos WHERE producto_id = ?";
-    $stmt_producto = $con->prepare($consulta_producto);
-    $stmt_producto->bind_param("i", $producto_id);
-    $stmt_producto->execute();
-    $result_producto = $stmt_articulo->get_result();
-
-    if ($fila_producto = $result_producto->fetch_assoc()) {
-        $respuesta['USUARIO'] = $fila_producto['usuario'];
-        $respuesta['NUMERO_PLACA'] = $fila_producto['numero_placa'];
-        $respuesta['ALERTA'] = "OK";
-        unset($respuesta['MENSAJE']);
-    }
-
-    $stmt_producto->close();
-    $con->close();
-
-    print json_encode($respuesta);
-}
     if($data_con->num_rows == 0){
         $alerta                     =                   "OK";
         $mensaje                    =                   "";
 
-        $consulta = "INSERT INTO datos_inventario (inventario_id, producto_id, usuario, numero_placa, cantidad, observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
-                            VALUES (".$id_inv.", ".$producto.",".$usuario.",".$numero_placa.", ".$cantidad.", '".$observacion."', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
+        $consulta = "INSERT INTO datos_inventario (inventario_id, producto_id, cantidad, observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
+                            VALUES (".$id_inv.", ".$producto.", ".$cantidad.", '".$observacion."', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
         $data                 =               $con->query($consulta);
     }else{
         $alerta                     =                   "ERROR";
