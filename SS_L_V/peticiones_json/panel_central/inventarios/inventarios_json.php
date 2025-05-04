@@ -59,34 +59,41 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         print json_encode(array("DATA" => $data));
     } elseif ($_POST['accion'] == 'ConsultarUno') {
 
-        $data               =                   [];
-        $id_inv             =                   $_POST["id_inv"];
-        $numero             =                   1;
+        
+        $data = [];
+        $id_inv = $_POST["id_inv"];
+        $numero = 1;
 
-        $consulta = "SELECT 
+        $consulta = "SELECT
                             dat_inv.id,
                             dat_inv.producto_id,
                             prod.descripcion prod_desc,
                             dat_inv.cantidad,
                             dat_inv.observacion,
-                            dat_inv.estado
-                        FROM datos_inventario dat_inv
-                        INNER JOIN productos prod ON (prod.id = dat_inv.producto_id)
-                        WHERE dat_inv.inventario_id = ".$id_inv;
-        $data_con 				=								$con->query($consulta);
+                            dat_inv.estado,
+                            prod.numero_placa num_placs,
+                            us.nombre us_nombre
+
+                         FROM datos_inventario dat_inv
+                         INNER JOIN productos prod ON (prod.id = dat_inv.producto_id)
+                         INNER JOIN usuarios us ON (us.id = prod.usuario_id)
+                         WHERE dat_inv.inventario_id = ".$id_inv;
+        $data_con = $con->query($consulta);
 
         if($data_con->num_rows > 0){
             foreach($data_con as $datos){
                 $data[] = array(
-                                    "NUMERO"            =>          $numero,
-                                    "ID"                =>          $datos["id"],
-                                    "PRODUC_ID"         =>          $datos["producto_id"],
-                                    "PROD_DES"          =>          $datos["prod_desc"],
-                                    "CANTIDAD"          =>          $datos["cantidad"],
-                                    "OBSERVACION"       =>          $datos["observacion"],
-                                    "ESTADO"            =>          ($datos["estado"] == 1)? "Activo" : "Inactivo",
-                                    "ESTADO_INT"        =>          $datos["estado"],
-                                );
+                    "NUMERO" => $numero,
+                    "ID" => $datos["id"],
+                    "PRODUC_ID" => $datos["producto_id"],
+                    "PROD_DES" => $datos["prod_desc"],
+                    "CANTIDAD" => $datos["cantidad"],
+                    "OBSERVACION" => $datos["observacion"],
+                    "ESTADO" => ($datos["estado"] == 1)? "Activo" : "Inactivo",
+                    "ESTADO_INT" => $datos["estado"],
+                    "NUM_PLAC" => $datos["num_placs"],
+                    "USUARIO" => $datos["us_nombre"]
+                );
                 $numero++;
             }
         }

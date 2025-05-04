@@ -2,114 +2,106 @@
 require_once("../../../includes/conexiones/Base_Datos/conexion.php");
 header("Content-Type: application/json");
 
-// Habilitar errores para depuración
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Conexión a la base de datos
+
 $con = conectar();
 if (!$con) {
     echo json_encode(["status" => "error", "message" => "Error al conectar con la base de datos."]);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) { // Assuming your file input has the name 'csv_file'
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     $file = $_FILES['csv_file'];
 
-    // Check for upload errors
+
     if ($file['error'] !== UPLOAD_ERR_OK) {
         echo json_encode(["status" => "error", "message" => "Error al cargar el archivo."]);
         exit;
     }
 
-    // Check file type (optional, but recommended)
+
     if ($file['type'] !== 'text/csv' && $file['type'] !== 'application/vnd.ms-excel') {
         echo json_encode(["status" => "error", "message" => "Formato de archivo no válido. Se esperaba un archivo CSV."]);
         exit;
     }
 
-    // Open the uploaded CSV file
+
     if (($handle = fopen($file['tmp_name'], "r")) !== FALSE) {
         $insertados = 0;
         $actualizados = 0;
         $omitidos = 0;
         $row_number = 0;
 
-        // Read the CSV file line by line
+
         while (($row_data = fgetcsv($handle)) !== FALSE) {
             $row_number++;
 
-            // Skip the header row (if it exists)
+
             if ($row_number === 1) {
-                continue; // Or process it if needed
+                continue; // O procesar encabezado
             }
 
-            // Assuming your CSV columns are in a specific order:
-            // id, bloque_id, descripcion, observacion, estado
-            if (count($row_data) !== 5) {
-                echo json_encode(["status" => "error", "message" => "Número incorrecto de columnas en la fila " . $row_number . "."]);
+            if (count($row_data) !== 4) {
+                echo json_encode(["status" => "error", "message" => "Número incorrecto de columnas en la fila " . $row_number . ". Se esperaban 4."]);
                 fclose($handle);
                 exit;
             }
 
-            $id = intval($row_data[0]);
-            $bloque_id = intval($row_data[1]);
-            $descripcion = $con->real_escape_string($row_data[2]);
-            $observacion = $con->real_escape_string($row_data[3]);
-            $estado = intval($row_data[4]);
+            $id_datos_inventario = intval($row_data[0]);
+            $articulo = $con->real_escape_string(trim($row_data[1]));
+            $cantidad = intval($row_data[2]);
+            $observacion = $con->real_escape_string(trim($row_data[3]));
             $fecha_actual = date('Y-m-d H:i:s');
 
-            // Verificar duplicado lógico
-            $sql_duplicado = "
-                SELECT id FROM ambientes
-                WHERE descripcion = '$descripcion'
-                  AND bloque_id = $bloque_id
-                  AND id != $id
-            ";
-            $res_duplicado = mysqli_query($con, $sql_duplicado);
+            // Buscar producto por descripción
+            $sql_producto = "SELECT id FROM productos WHERE descripcion = '$articulo'";
+            $res_producto = mysqli_query($con, $sql_producto);
+            $producto = mysqli_fetch_assoc($res_producto);
 
-            if (mysqli_num_rows($res_duplicado)) {
+            if (!$producto) {
+                echo json_encode(["status" => "warning", "message" => "Producto no encontrado para Artículo: '$articulo' en la fila " . $row_number . ". Fila omitida."]);
                 $omitidos++;
-                continue; // Saltar inserción o actualización
+                continue;
             }
 
-            // Verificar si el ID existe
-            $sql_existencia = "SELECT id FROM ambientes WHERE id = $id";
-            $result = mysqli_query($con, $sql_existencia);
-
-            if (mysqli_num_rows($result)) {
-                // Actualizar
-                $sql_update = "
-                    UPDATE ambientes SET
-                        bloque_id = $bloque_id,
-                        descripcion = '$descripcion',
+            // Verificar si el registro en datos_inventario existe para actualizar
+            if ($id_datos_inventario > 0) {
+                $sql_update_inv = "
+                    UPDATE datos_inventario SET
+                        producto_id = {$producto['id']},
+                        cantidad = $cantidad,
                         observacion = '$observacion',
-                        estado = $estado,
-                        usuario_act = 1,
+                        usuario_act = 1, // Manteniendo un usuario por defecto o NULL según tu necesidad
                         fecha_act = '$fecha_actual'
-                    WHERE id = $id
+                    WHERE id = $id_datos_inventario
                 ";
-                if (!mysqli_query($con, $sql_update)) {
-                    echo json_encode(["status" => "error", "message" => "Error al actualizar en la fila " . $row_number . ": " . mysqli_error($con)]);
+                if (mysqli_query($con, $sql_update_inv)) {
+                    $actualizados++;
+                } else {
+                    echo json_encode(["status" => "error", "message" => "Error al actualizar datos de inventario en la fila " . $row_number . ": " . mysqli_error($con)]);
                     fclose($handle);
                     exit;
                 }
-                $actualizados++;
+
             } else {
-                // Insertar
-                $sql_insert = "
-                    INSERT INTO ambientes
-                        (id, bloque_id, descripcion, observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
-                    VALUES
-                        ($id, $bloque_id, '$descripcion', '$observacion', $estado, 1, 1, '$fecha_actual', '$fecha_actual')
+                // Insertar nuevo registro en datos_inventario
+                $inventario_id_fijo = 1; // ¡DEBES AJUSTAR ESTO!
+                $sql_insert_inv = "
+                    INSERT INTO datos_inventario (inventario_id, producto_id, cantidad, observacion, estado, usuario_create, fecha_create)
+                    VALUES ($inventario_id_fijo, {$producto['id']}, $cantidad, '$observacion', 1, 1, '$fecha_actual') // Manteniendo un usuario por defecto o NULL
                 ";
-                if (!mysqli_query($con, $sql_insert)) {
-                    echo json_encode(["status" => "error", "message" => "Error al insertar en la fila " . $row_number . ": " . mysqli_error($con)]);
+                if (mysqli_query($con, $sql_insert_inv)) {
+                    $insertados++;
+                } else {
+                    echo json_encode(["status" => "error", "message" => "Error al insertar datos de inventario en la fila " . $row_number . ": " . mysqli_error($con)]);
                     fclose($handle);
                     exit;
                 }
-                $insertados++;
+
             }
         }
         fclose($handle);

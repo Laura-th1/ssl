@@ -36,7 +36,7 @@ if (!isset($_SESSION['ROL'])) {
 // Verifica si el rol del usuario está permitido
 $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico', 'Administrador']);
 ?>
-?>
+
 
 
 <!DOCTYPE html>
@@ -386,14 +386,12 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         dataField: 'OBSERVACION',
                     },{
                         caption: 'Nº de Placa', 
-                        dataField: 'NUMERO_PLACA', 
+                        dataField: 'NUM_PLAC', 
                     },
                      {
                         caption: 'Usuario', 
-                        dataField: 'USUARIO_ID', 
-                     },
-
-                    {
+                        dataField: 'USUARIO', 
+                     },{
                         dataField: '',
                         caption: 'Acciones',
                         cellTemplate: function(container, options) {
