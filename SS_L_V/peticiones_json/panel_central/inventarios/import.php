@@ -2,121 +2,172 @@
 require_once("../../../includes/conexiones/Base_Datos/conexion.php");
 header("Content-Type: application/json");
 
-
+// Configuración de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
+// Conexión a la base de datos
 $con = conectar();
 if (!$con) {
-    echo json_encode(["status" => "error", "message" => "Error al conectar con la base de datos."]);
+    echo json_encode(["status" => "error", "message" => "Error de conexión: " . mysqli_connect_error()]);
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
     $file = $_FILES['csv_file'];
 
-
+    // Validaciones del archivo
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        echo json_encode(["status" => "error", "message" => "Error al cargar el archivo."]);
+        echo json_encode(["status" => "error", "message" => "Error en el archivo: " . $file['error']]);
         exit;
     }
 
-
-    if ($file['type'] !== 'text/csv' && $file['type'] !== 'application/vnd.ms-excel') {
-        echo json_encode(["status" => "error", "message" => "Formato de archivo no válido. Se esperaba un archivo CSV."]);
+    // Procesar CSV
+    $handle = fopen($file['tmp_name'], "r");
+    if ($handle === FALSE) {
+        echo json_encode(["status" => "error", "message" => "No se pudo leer el archivo"]);
         exit;
     }
 
+    // Configuración
+    $usuario_id = 1; // ID del usuario que importa (ajustar según tu sistema)
+    $estado_default = 1; // Estado activo
 
-    if (($handle = fopen($file['tmp_name'], "r")) !== FALSE) {
-        $insertados = 0;
-        $actualizados = 0;
-        $omitidos = 0;
+    // Contadores
+    $resultados = [
+        'insertados' => 0,
+        'actualizados' => 0,
+        'omitidos' => 0,
+        'errores' => []
+    ];
+
+    // Iniciar transacción
+    mysqli_begin_transaction($con);
+
+    try {
         $row_number = 0;
-
-
-        while (($row_data = fgetcsv($handle)) !== FALSE) {
+        while (($data = fgetcsv($handle)) !== FALSE) {
             $row_number++;
+            
+            // Saltar encabezado (fila 1)
+            if ($row_number === 1) continue;
 
-
-            if ($row_number === 1) {
-                continue; // O procesar encabezado
-            }
-
-            if (count($row_data) !== 4) {
-                echo json_encode(["status" => "error", "message" => "Número incorrecto de columnas en la fila " . $row_number . ". Se esperaban 4."]);
-                fclose($handle);
-                exit;
-            }
-
-            $id_datos_inventario = intval($row_data[0]);
-            $articulo = $con->real_escape_string(trim($row_data[1]));
-            $cantidad = intval($row_data[2]);
-            $observacion = $con->real_escape_string(trim($row_data[3]));
-            $fecha_actual = date('Y-m-d H:i:s');
-
-            // Buscar producto por descripción
-            $sql_producto = "SELECT id FROM productos WHERE descripcion = '$articulo'";
-            $res_producto = mysqli_query($con, $sql_producto);
-            $producto = mysqli_fetch_assoc($res_producto);
-
-            if (!$producto) {
-                echo json_encode(["status" => "warning", "message" => "Producto no encontrado para Artículo: '$articulo' en la fila " . $row_number . ". Fila omitida."]);
-                $omitidos++;
+            // Validar datos mínimos (id, producto_id, cantidad, observacion)
+            if (count($data) < 4) {
+                $resultados['omitidos']++;
+                $resultados['errores'][] = "Fila $row_number: No tiene suficientes columnas (se esperaban al menos 4)";
                 continue;
             }
 
-            // Verificar si el registro en datos_inventario existe para actualizar
-            if ($id_datos_inventario > 0) {
-                $sql_update_inv = "
-                    UPDATE datos_inventario SET
-                        producto_id = {$producto['id']},
+            // Obtener y validar datos
+            $id = intval($data[0]);
+            $producto_id = intval($data[1]);
+            $cantidad = intval($data[2]);
+            $observacion = trim($data[3]);
+           
+
+            // Validación básica de datos
+            if ($producto_id <= 0 || $cantidad < 0) {
+                $resultados['omitidos']++;
+                $resultados['errores'][] = "Fila $row_number: Datos inválidos (producto_id o cantidad)";
+                continue;
+            }
+
+            // Verificar si el producto existe
+            $query = "SELECT id FROM productos WHERE id = $producto_id LIMIT 1";
+            $res = mysqli_query($con, $query);
+
+            if (!$res || mysqli_num_rows($res) === 0) {
+                $resultados['omitidos']++;
+                $resultados['errores'][] = "Fila $row_number: Producto con ID $producto_id no encontrado";
+                continue;
+            }
+
+            // Verificar si el producto ya existe en el inventario
+            $query = "SELECT id FROM datos_inventario WHERE producto_id = $producto_id LIMIT 1";
+            $res = mysqli_query($con, $query);
+
+            if ($res && mysqli_num_rows($res) > 0) {
+                // Producto duplicado encontrado
+                $duplicado = mysqli_fetch_assoc($res);
+                $duplicado_id = $duplicado['id'];
+
+                // Enviar respuesta al frontend para mostrar la alerta de confirmación
+                echo json_encode([
+                    "status" => "duplicado",
+                    "message" => "El producto con ID $producto_id ya existe en el inventario. ¿Desea actualizarlo?",
+                    "duplicado_id" => $duplicado_id
+                ]);
+                exit;
+            }
+
+            // Escapar valores
+            $observacion_esc = mysqli_real_escape_string($con, $observacion);
+            
+            $fecha = date('Y-m-d H:i:s');
+
+            
+
+            // Determinar si es actualización o inserción
+            if ($duplicado_id) {
+                // ACTUALIZAR registro existente
+                $sql = "UPDATE datos_inventario SET
+                        producto_id = $producto_id,
                         cantidad = $cantidad,
-                        observacion = '$observacion',
-                        usuario_act = 1, // Manteniendo un usuario por defecto o NULL según tu necesidad
-                        fecha_act = '$fecha_actual'
-                    WHERE id = $id_datos_inventario
-                ";
-                if (mysqli_query($con, $sql_update_inv)) {
-                    $actualizados++;
-                } else {
-                    echo json_encode(["status" => "error", "message" => "Error al actualizar datos de inventario en la fila " . $row_number . ": " . mysqli_error($con)]);
-                    fclose($handle);
-                    exit;
-                }
+                        observacion = '$observacion_esc',
+                        usuario_act = $usuario_id,
+                        fecha_act = '$fecha'
+                    WHERE id = $id";
 
+                if (!mysqli_query($con, $sql)) {
+                    throw new Exception("Error al actualizar fila $row_number: " . mysqli_error($con));
+                }
+                $resultados['actualizados']++;
             } else {
-                // Insertar nuevo registro en datos_inventario
-                $inventario_id_fijo = 1; // ¡DEBES AJUSTAR ESTO!
-                $sql_insert_inv = "
-                    INSERT INTO datos_inventario (inventario_id, producto_id, cantidad, observacion, estado, usuario_create, fecha_create)
-                    VALUES ($inventario_id_fijo, {$producto['id']}, $cantidad, '$observacion', 1, 1, '$fecha_actual') // Manteniendo un usuario por defecto o NULL
-                ";
-                if (mysqli_query($con, $sql_insert_inv)) {
-                    $insertados++;
-                } else {
-                    echo json_encode(["status" => "error", "message" => "Error al insertar datos de inventario en la fila " . $row_number . ": " . mysqli_error($con)]);
-                    fclose($handle);
-                    exit;
-                }
+                // INSERTAR nuevo registro
+                $sql = "INSERT INTO datos_inventario (inventario_id,
+                    producto_id, cantidad, observacion, 
+                    estado, usuario_create, fecha_create
+                ) VALUES (
+                    $id, $producto_id, $cantidad, '$observacion_esc', 
+                    $estado_default, $usuario_id, '$fecha'
+                )";
 
+                if (!mysqli_query($con, $sql)) {
+                    throw new Exception("Error al insertar fila $row_number: " . mysqli_error($con));
+                }
+                $resultados['insertados']++;
             }
         }
+
+        // Confirmar cambios si todo fue bien
+        mysqli_commit($con);
         fclose($handle);
 
-        echo json_encode([
+        // Respuesta exitosa
+        $response = [
             "status" => "success",
-            "message" => "Datos procesados correctamente.",
-            "insertados" => $insertados,
-            "actualizados" => $actualizados,
-            "omitidos" => $omitidos
-        ]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Error al abrir el archivo CSV."]);
+            "message" => "Importación completada",
+            "resultados" => $resultados
+        ];
+
+    } catch (Exception $e) {
+        // Revertir en caso de error
+        mysqli_rollback($con);
+        fclose($handle);
+
+        $response = [
+            "status" => "error",
+            "message" => $e->getMessage(),
+            "resultados" => $resultados,
+            "ultima_fila" => $row_number
+        ];
     }
+
+    echo json_encode($response);
+
 } else {
-    echo json_encode(["status" => "error", "message" => "Método no permitido o archivo no recibido."]);
+    echo json_encode(["status" => "error", "message" => "Solicitud inválida"]);
 }
 ?>

@@ -213,7 +213,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     <!-- <script src="../../../../includes/js/panel_administrativo/dashboard.js"></script> -->
     <script src="../../../../includes/librerias/jquery-confirm/js/jquery-confirm.min.js"></script>
     <script src="https://cdn3.devexpress.com/jslib/21.2.3/js/dx.all.js"></script>
-    <script src="https://cdn3.devexpress.com/jslib/21.2.3/js/dx.exporter.js"></script>
+    <!-- <script src="https://cdn3.devexpress.com/jslib/21.2.3/js/dx.exporter.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.2.1/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="../../../../includes/js/global/scripts.js"></script>
@@ -529,13 +529,17 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         if (data.status === "success") {
                             alert("Datos importados correctamente.");
                             consultas("Inventarios"); // Actualizar la tabla
+                            
+                            return true;
                         } else {
                             alert("Error al importar los datos: " + data.message);
+                            return false;
+
                         }
                     })
                     .catch(error => {
                         console.error("Error al enviar datos:", error);
-                        alert("Error al importar los datos.");
+                        location.reload(); // Recargar la página
                     });
                 } else {
                     alert("No se seleccionó ningún archivo.");
@@ -609,13 +613,14 @@ var importCsvOption = {
                     if (data.status === "success") {
                         alert("Datos importados correctamente.");
                         consultas("Inventarios"); // Actualizar la tabla by calling the existing function
+                        location.reload(); // Recargar la página
                     } else {
                         alert("Error al importar los datos: " + data.message);
                     }
                 })
                 .catch(error => {
                     console.error("Error al enviar datos:", error);
-                    alert("Error al importar los datos.");
+                    
                 });
             } else {
                 alert("No se seleccionó ningún archivo.");
