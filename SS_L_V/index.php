@@ -1,5 +1,38 @@
+
 <?php
 session_start();
+
+if (!isset($_SESSION['USUARIO'])) {
+    header("Location: ../SS_L_V/login/index");
+    exit;
+}
+
+// Verifica si el rol ya está en la sesión
+if (!isset($_SESSION['ROL'])) {
+    // Si no está definido, obtén el rol del usuario desde la base de datos
+    include_once("../../../includes/conexiones/Base_Datos/conexion.php");
+    $con = conectar();
+
+    if (!$con) {
+        die("Error al conectar con la base de datos.");
+    }
+
+    $usuario = $_SESSION['USUARIO']; // Asegúrate de que el usuario esté en la sesión
+    $consulta = $con->prepare("SELECT rol_id FROM usuarios WHERE usuario = ?");
+    $consulta->bind_param("s", $usuario);
+    $consulta->execute();
+    $resultado = $consulta->get_result();
+
+    if ($resultado->num_rows > 0) {
+        $fila = $resultado->fetch_assoc();
+        $_SESSION['ROL'] = $fila['rol_id'];
+    } else {
+        die("No se pudo obtener el rol del usuario.");
+    }
+}
+
+// Verifica si el rol del usuario está permitido
+$rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrador']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +76,10 @@ session_start();
                             }else{
                         ?>   
                             <li class="nav-item"><a class="nav-link" href="./modulos/agenda_ambientes">Agenda de Ambientes</a></li>
+                    <?php 
+                    if($rolPermitido):?>
                             <li class="nav-item"><a class="nav-link" href="./modulos/panel_administrativo">Panel Administrativo</a></li>
+                            <?php endif;?>
                             <li class="nav-item"><a class="nav-link" href="./modulos/panel_central">Panel Central</a></li>
                             <li class="nav-item dropdown"> 
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> 
@@ -246,7 +282,7 @@ session_start();
         if (messageValue === "") {
             // Si el campo está vacío, mostrar el mensaje de error
             messageInput.classList.add("is-invalid");
-            invalidFeedback.style.display = "block";
+            invalidFeedback.style.display = "block";    
             successMessage.classList.add("d-none");
             errorMessage.classList.remove("d-none");
             return; // Detener el proceso si el mensaje está vacío
