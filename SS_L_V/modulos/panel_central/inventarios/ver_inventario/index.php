@@ -62,7 +62,8 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.3/css/dx.common.css">
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.3/css/dx.light.css">
-    <script>
+
+     <script>
     var rolPermitido = <?php echo json_encode($rolPermitido); ?>;
 </script>
 </head>
@@ -75,7 +76,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
         </div>
     </div>
 
-
+    
     <div id="main-wrapper">
         <header class="topbar">
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
@@ -85,7 +86,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         <span class="brand-text">Sena Stock</span>
                     </a>
                 </div>
-                
+
             </nav>
         </header>
         <aside class="left-sidebar">
@@ -154,6 +155,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 </li>
 <?php endif; ?>
                     </ul>
+                    
                 </nav>
             </div>
         </aside>

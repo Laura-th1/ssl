@@ -19,6 +19,11 @@
             <input type="email" class="form-control" id="correo" name="correo" aria-describedby="emailHelp">
         </div>
         <br><button type="submit" class="btn">Enviar</button>
+        <div>
+            <div class="mb-3">
+                <br><p><a href="../" id="back-to-login-link">Volver al login</a></p>
+        </div>
+    
     </form>
 </div>
 </body>

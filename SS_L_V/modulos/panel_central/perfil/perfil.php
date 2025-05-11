@@ -172,6 +172,10 @@ if (!isset($_SESSION['USUARIO'])) {
     </div>
 
     <div class="profile-info">
+        <h3 class="text-themecolor">Rol:</h3>
+        <p><?php echo htmlspecialchars($_SESSION['ROL']); ?></p>
+    </div>
+    <div class="profile-info">
         <h3 class="text-themecolor">Usuario:</h3>
         <p><?php echo htmlspecialchars($_SESSION['USUARIO']); ?></p>
     </div>

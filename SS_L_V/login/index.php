@@ -50,9 +50,7 @@
     <div class="text-center">
         <p><a href="RecuperaCon.php" id="forgot-password-link">¿Olvidó su contraseña?</a></p>
     </div>
-    <div class="text-center">
-        <p><a href="../" id="back-to-login-link">Volver al inicio</a></p>
-    </div>
+
 </form>  
     </div>
 
