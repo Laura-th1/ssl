@@ -452,6 +452,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                                     consultas("Usuarios");
                                                     ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Usuario Insertado Con Exito', '');
                                                     return true;
+                                                    location.reload();
                                                 } else if (data["ALERTA"] === 'ERROR') {
                                                     crear.close();
                                                     CrearNueva();

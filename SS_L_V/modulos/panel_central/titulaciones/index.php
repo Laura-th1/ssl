@@ -220,15 +220,17 @@ if (!isset($_SESSION['USUARIO'])) {
                                         <div class="row">
                                             <div class="col-md-12" id="div_nickname">
                                                 <div class="form-group">
-                                                    <label for="nickname">Nombre:</label>
-                                                    <input type="text" class="form-control text-dark bg-white" id="nombre" name="nombre" placeholder="Ingresar el nombre"/>
+                                                    <label for="nickname">Nombre y # de Ficha:</label>
+                                                    <input type="text" class="form-control text-dark bg-white" id="nombre" name="nombre" placeholder="Ingresar el nombre y el número de ficha"/>
+                                                    <div id="error_nombre" class="text-danger" style="display:none;">Por favor, ingresa el nombre y el número de ficha.</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-12" id="div_options"> 
                                                 <div class="form-group"> 
                                                     <label for="tp_titulaciones">Tipo Titulacion:</label> 
                                                     <select class="form-control text-dark bg-white" id="tp_titulaciones" name="tp_titulaciones"> 
-                                                    </select> 
+                                                    </select>
+
                                                 </div> 
                                             </div>
                                         </div>
@@ -244,8 +246,20 @@ if (!isset($_SESSION['USUARIO'])) {
                         text: 'Guardar',
                         btnClass: 'btn btn-green',
                         action: function(saveButton) {
-                            var nombre = $("#nombre").val();
-                            
+                            var nombre = $("#nombre").val();   
+                                
+                            // Validar si el campo 'nombre' está vacío
+                    if (nombre.trim() === '') {
+                        $.alert({ // Puedes usar otra forma de mostrar el error
+                            title: 'Error',
+                            content: 'Por favor, ingresa el nombre y el número de ficha.',
+                            type: 'red',
+                            closeIcon: true,
+                            backgroundDismiss: true
+                        });
+                        return false; // Evita que se cierre el modal y se ejecute la petición
+                    }
+
                             requisitos("POST",
                                 "../../../peticiones_json/panel_central/titulaciones/titulaciones_json.php",
                                 "opcion=AccionInsertar&nombre=" + nombre + "&tp_titulaciones=" + $("#tp_titulaciones").val()+ "&jsonp=?",
@@ -255,7 +269,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                         ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Insertado Con Exito', '');
                                         return true;
                                     } else if (data["ALERTA"] == 'ERROR') {
-                                        crear.close;
+                                        crear.close();
                                         CrearNueva();
                                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
                                         return false;
@@ -284,7 +298,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                         <div class="row">
                                             <div class="col-md-12" id="div_nickname">
                                                 <div class="form-group">
-                                                    <label for="nickname">Nombre:</label>
+                                                    <label for="nickname">Nombre y # de Ficha:</label>
                                                     <input type="text" class="form-control text-dark bg-white" id="nombre" name="nombre" placeholder="" value="${nombre}"/>
                                                 </div>
                                             </div>
@@ -329,8 +343,9 @@ if (!isset($_SESSION['USUARIO'])) {
                                 function(data) {
                                     if (data["ALERTA"] == 'OK') {
                                         consultas("Titulaciones");
-                                        ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Actualizo Con Exito', '');
+                                        ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Actualizado Con Exito', '');
                                         return true;
+                                        location.reload();
                                     } else if (data["ALERTA"] == 'ERROR') {
                                         editar.close;
                                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');

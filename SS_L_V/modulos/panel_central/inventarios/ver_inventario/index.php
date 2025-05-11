@@ -147,7 +147,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     </a>
 </li>
 <li>
-    <a class="waves-effect waves-dark" href="../titulaciones" aria-expanded="false">
+    <a class="waves-effect waves-dark" href="../../titulaciones/" aria-expanded="false">
         <i class="fa fa-smile-o"></i>
         <span class="hide-menu">Titulaciones</span>
     </a>
