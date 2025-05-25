@@ -702,15 +702,7 @@ var importCsvOption = {
     }
 };
 
-// Assuming you have a way to add this button to your UI, 
-// you would use the 'importCsvOption' object in that mechanism.
-// For example, if you are using a toolbar or a similar component:
-// options: [ ..., importCsvOption, ... ] 
 
-// If you need to trigger the initial data load, you would typically call consultas('Ambientes') 
-// somewhere after the page has loaded.
-
-// ... (rest of your JavaScript code, including requisitos and TBAmbientes functions) ...
         function cerrarSesion(event) {
     event.preventDefault();
 
