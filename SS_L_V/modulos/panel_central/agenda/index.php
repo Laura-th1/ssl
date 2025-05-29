@@ -71,8 +71,14 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="nombre">Fecha:</label>
+                                        <label for="nombre">Fecha Inicial:</label>
                                         <input type="date" class="form-control text-dark bg-white" id="fecha" name="fecha"/>
+                                    </div>
+                                </div>
+                                 <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="nombre">Fecha Final:</label>
+                                        <input type="date" class="form-control text-dark bg-white" id="fecha_fin" name="fecha_fin"/>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -124,17 +130,19 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 btnClass: 'btn btn-green',
                 action: function(saveButton) {
                     var fecha = $("#fecha").val();
+                    var fecha_fin = $("#fecha_fin").val();
                     var hora_ini = $("#hora_ini").val();
                     var hora_fin = $("#hora_fin").val();
 
                     // Validación antes de enviar los datos
-                    if (!fecha || !hora_ini || !hora_fin || !$("#bloque").val() || !$("#ambiente").val() || !$("#titulacion").val()) {
+                    if (!fecha || !fecha_fin|| !hora_ini || !hora_fin || !$("#bloque").val() || !$("#ambiente").val() || !$("#titulacion").val()) {
                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Por favor complete todos los campos.', '');
                         return false;
                     }
 
                     console.log({
                         fecha: $('#fecha').val(),
+                        fecha_fin: $('#fecha_fin').val(),
                         hora_ini: $('#hora_ini').val(),
                         hora_fin: $('#hora_fin').val(),
                         bloque: $('#bloque').val(),
@@ -149,6 +157,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         data: {
                             opcion: "AccionInsertar",
                             fecha: fecha,
+                            fecha_fin: fecha_fin,
                             hora_ini: hora_ini,
                             hora_fin: hora_fin,
                             bloque: $("#bloque").val(),   // Usamos el id correcto
@@ -385,7 +394,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 
 
 
-        function Editar(id, fecha, hora_ini, hora_fin, Bloque, ambiente, titulacion, estado) {
+        function Editar(id, fecha, fecha_fin, hora_ini, hora_fin, Bloque, ambiente, titulacion, estado) {
     editar = $.confirm({
         title: 'Editar Ambiente',
         backgroundDismiss: false,
@@ -396,8 +405,14 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="fecha">Fecha:</label>
+                            <label for="fecha">Fecha Inicio:</label>
                             <input type="date" class="form-control text-dark bg-white" id="fecha" name="fecha"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fecha">Fecha Final:</label>
+                            <input type="date" class="form-control text-dark bg-white" id="fecha_fin" name="fecha_fin"/>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -463,6 +478,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                             opcion: "AccionActualizar",
                             id: id,
                             fecha: $("#fecha").val(),
+                            fecha_fin: $("#fecha_fin").val(),
                             hora_ini: $("#hora_ini").val(),
                             hora_fin: $("#hora_fin").val(),
                             bloque: $("#bloque").val(),
@@ -493,6 +509,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
         },
         onContentReady: function () {
             $('#fecha').val(fecha);
+            $('#fecha_fin').val(fecha_fin);
             $('#hora_ini').val(hora_ini);
             $('#hora_fin').val(hora_fin);
 
@@ -537,11 +554,16 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 columns: [{
                         dataField: 'NUMERO',
                         caption: 'N°',
-                        width: 100
                     },
                     {
                         dataField: 'FECHA',
-                        caption: 'Fecha'
+                        caption: 'Fecha Inicio',
+                        dataType: 'date',
+                    },
+                    {
+                        dataField: 'FECHA_FIN',
+                        caption: 'Fecha Fin',
+                        dataType: 'date',
                     },
                     {
                         dataField: 'HORA_INI',
@@ -573,7 +595,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         cellTemplate: function(container, options) {
                             if (rolPermitido) {
                                 $(`<td>
-                                    <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.FECHA}', '${options.data.HORA_INI}', '${options.data.HORA_FIN}', ${options.data.BLOQ_ID}, ${options.data.AMBIENTE_ID}, ${options.data.TITULACION_ID}, ${options.data.ESTADO_INT});">
+                                    <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.FECHA}','${options.data.FECHA_FIN}', '${options.data.HORA_INI}', '${options.data.HORA_FIN}', ${options.data.BLOQ_ID}, ${options.data.AMBIENTE_ID}, ${options.data.TITULACION_ID}, ${options.data.ESTADO_INT});">
                                         Editar
                                     </button>
                                 </td>`).appendTo(container);
@@ -606,7 +628,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 },
                 export: {
                     enabled: true,
-                    fileName: 'Departamentos',
+                    fileName: 'Agendamientos',
                     allowExportSelectedData: true,
                     texts: {
                         exportAll: 'Exportar todo',

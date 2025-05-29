@@ -248,12 +248,6 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label for="nombre">Cantidad:</label>
-                                                <input type="number" class="form-control text-dark bg-white" id="cantidad" name="cantidad" placeholder=""/>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label for="observacion">Observación:</label>
                                                 <textarea class="form-control text-dark bg-white" id="observacion" name="observacion" placeholder=""></textarea>
                                             </div>
@@ -272,12 +266,11 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         text: 'Guardar',
                         btnClass: 'btn btn-green',
                         action: function(saveButton){
-                            var cantidad = $("#cantidad").val();
                             var observacion = $("#observacion").val();
                             
                             requisitos("POST",
                                 "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                                "opcion=AccionInsertarInv&id_inv="+id_inventario+"&cantidad="+cantidad+"&observacion="+observacion+"&producto=" + $("#producto").val()+ "&jsonp=?",
+                                "opcion=AccionInsertarInv&id_inv="+id_inventario+"&observacion="+observacion+"&producto=" + $("#producto").val()+ "&jsonp=?",
                                 function(data) {
                                     if (data["ALERTA"] == 'OK') {
                                         consultas("Inventario");
@@ -302,7 +295,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
             });
         }
 
-        function Editar(id, cantidad, observacion) {
+        function Editar(id, observacion) {
             editar = $.confirm({
                 title: 'Editar Inventario',
                 backgroundDismiss: false,
@@ -311,12 +304,6 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                 content: `<div class="panel panel-body">
                                 <form>
                                     <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label for="nombre">Cantidad:</label>
-                                                <input type="number" class="form-control text-dark bg-white" id="cantidad" name="cantidad" placeholder="" value="${cantidad}"/>
-                                            </div>
-                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="observacion">Observación:</label>
@@ -338,12 +325,12 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         btnClass: 'btn btn-green',
                         action: function(saveButton){
 
-                            var cantidad = $("#cantidad").val();
+                            
                             var observacion = $("#observacion").val();
 
                             requisitos("POST",
                                 "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                                "opcion=AccionActualizarInv&id="+id+"&cantidad=" + cantidad + "&observacion="+observacion+"&jsonp=?",
+                                "opcion=AccionActualizarInv&id="+id+ "&observacion="+observacion+"&jsonp=?",
                                 function(data) {
                                     if (data["ALERTA"] == 'OK') {
                                         consultas("Inventario");
@@ -353,7 +340,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                         editar.close();
                                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
                                         return false;
-                                        editar(id, cantidad, observacion);
+                                        editar(id,  observacion);
                                     }
                                 },
                                 "",
@@ -380,10 +367,6 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         dataField: 'PROD_DES',
                     },
                     {
-                        caption: 'Cantidad',
-                        dataField: 'CANTIDAD',
-                    },
-                    {
                         caption: 'Observacion',
                         dataField: 'OBSERVACION',
                     },{
@@ -391,7 +374,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         dataField: 'NUM_PLAC', 
                     },
                      {
-                        caption: 'Usuario', 
+                        caption: 'Cuentadante', 
                         dataField: 'USUARIO', 
                      },{
                         dataField: '',
@@ -399,7 +382,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         cellTemplate: function(container, options) {
                             if (rolPermitido) {
                                 $(`<td>
-                                <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.CANTIDAD}', '${options.data.OBSERVACION}');"> 
+                                <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.OBSERVACION}');"> 
                                     Editar
                                 </button>
                                 <button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;" onclick="Eliminar(${options.data.ID});"> 

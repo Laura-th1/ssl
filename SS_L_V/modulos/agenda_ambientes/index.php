@@ -63,9 +63,7 @@ if (!isset($_SESSION['USUARIO'])) {
             </div>
         </nav>
 
-        <!-- <section class="page-section">
-            
-        </section> -->
+        <!-- SECCIÓN DE LA PÁGINA DE AGENDAMIENTO DE AMBIENTES -->
 
         <header class="masthead">
             <div class="slider">
@@ -194,17 +192,17 @@ if (!isset($_SESSION['USUARIO'])) {
                                             <div class="d-flex">
                                                 <img class="img-fluid me-3 border" src="https://images.pexels.com/photos/256395/pexels-photo-256395.jpeg?cs=srgb&dl=pexels-pixabay-256395.jpg&fm=jpg" alt="Imagen de la sesión 3" style="width: 100px; height: auto;">
                                                 <div class="text-start" style="font-size: 12px;">
-                                                    <h4 class="card-title">${option.BLOQ_DESC}</h4>
-                                                    <p class="card-text">Fecha: ${option.FECHA}</p>
+                                                <h4 class="card-text">Ambiente ${option.AMBIENTE_DES}${option.BLOQ_DESC}</h4>
+                                                    <p class="card-text">Fecha Ini: ${option.FECHA}</p>
+                                                    <p class="card-text">Fecha Fin: ${option.FECHA_FIN}</p>
                                                     <p class="card-text">Hora Ini: ${option.HORA_INI}</p>
                                                     <p class="card-text">Hora Ini: ${option.HORA_FIN}</p>
-                                                    <p class="card-text">Ambiente: ${option.AMBIENTE_DES}</p>
                                                     <p class="card-text">Titulacion: ${option.TITULACION_DESC}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     `;
-
+                                     
                                     container.append(card);
                                 });
                             },

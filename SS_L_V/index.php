@@ -115,11 +115,11 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
             <div class="container px-4 px-lg-5 h-100">
                 <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
                     <div class="col-lg-8 align-self-end">
-                        <h1 class="text-white font-weight-bold">Sistema de Gestión de Inventarios Sena Stock</h1>
+                        <h1 class="text-white font-weight-bold">Sena Stock</h1>
                         <hr class="divider" />
                     </div>
                     <div class="col-lg-8 align-self-baseline">
-                        <p class="text-white-75 mb-5">Bienvenido al Sistema de Gestión de Inventarios del Sena. Este portal está diseñado para facilitar el control, seguimiento y administración de los recursos y equipos de los ambientes. A través de esta plataforma, los usuarios pueden gestionar entradas, salidas, actualizaciones y reportes de inventario de manera eficiente, garantizando la transparencia y optimización de los activos de los ambientes del Sena.</p>
+                        <p class="text-white-75 mb-5">Este portal está diseñado para facilitar el control, seguimiento y administración de los recursos y equipos de los ambientes del centro de comercio y servicios. A través de esta plataforma, los usuarios pueden gestionar entradas, salidas, actualizaciones y reportes de inventario de manera eficiente, garantizando la transparencia y optimización de los activos de los ambientes del centro.</p>
                         <a class="btn btn-sena btn-xl" href="./login/index.php">Iniciar Proceso</a>
                     </div>
                 </div>

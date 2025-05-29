@@ -23,6 +23,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $consulta = "SELECT 
                             age.id,
                             age.fecha,
+                            age.fecha_fin,
                             age.hora_ini,
                             age.hora_fin,
                             bloq.id AS bloque_id,
@@ -44,6 +45,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                     "NUMERO" => $numero,
                     "ID" => $datos["id"],
                     "FECHA" => $datos["fecha"],
+                    "FECHA_FIN" => $datos["fecha_fin"],
                     "HORA_INI" => $datos["hora_ini"],
                     "HORA_FIN" => $datos["hora_fin"],
                     "BLOQ_ID" => $datos["bloque_id"],
@@ -127,6 +129,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $consulta = "SELECT 
                             age.id,
                             age.fecha,
+                            age.fecha_fin,
                             age.hora_ini,
                             age.hora_fin,
                             bloq.id bloque_id,
@@ -151,6 +154,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                     "NUMERO" => $numero,
                     "ID" => $datos["id"],
                     "FECHA" => $datos["fecha"],
+                    "FECHA_FIN" => $datos["fecha_fin"],
                     "HORA_INI" => $datos["hora_ini"],
                     "HORA_FIN" => $datos["hora_fin"],
                     "BLOQ_ID" => $datos["bloque_id"],
@@ -169,6 +173,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     }
 } elseif ($_POST['opcion'] == 'AccionInsertar') {
     $fecha = $_POST["fecha"];
+    $fecha_fin = $_POST["fecha_fin"];
     $hora_ini = $_POST["hora_ini"];
     $hora_fin = $_POST["hora_fin"];
     $bloque = $_POST["bloque"];
@@ -178,6 +183,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $consulta = "SELECT *
                         FROM agenda_ambientes
                         WHERE fecha = '" . $fecha . "'
+                        AND fecha_fin = '" . $fecha_fin . "'
                         AND hora_ini >= '" . $hora_ini . "'
                         AND hora_fin <= '" . $hora_fin . "'
                         AND bloque_id = " . $bloque . "
@@ -188,8 +194,8 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $alerta = "OK";
         $mensaje = "";
 
-        $consulta = "INSERT INTO agenda_ambientes (fecha, hora_ini, hora_fin, bloque_id, ambiente_id, titulacion_id, estado, usuario_create, usuario_act, fecha_create, fecha_act)
-                            VALUES ('" . $fecha . "',  '" . $hora_ini . "', '" . $hora_fin . "', " . $bloque . ", " . $ambiente . ", " . $titulacion . ", 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
+        $consulta = "INSERT INTO agenda_ambientes (fecha, fecha_fin, hora_ini, hora_fin, bloque_id, ambiente_id, titulacion_id, estado, usuario_create, usuario_act, fecha_create, fecha_act)
+                            VALUES ('" . $fecha . "', '" . $fecha_fin . "',  '" . $hora_ini . "', '" . $hora_fin . "', " . $bloque . ", " . $ambiente . ", " . $titulacion . ", 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
         $data = $con->query($consulta);
     } else {
         $alerta = "ERROR";
@@ -200,11 +206,12 @@ if ($_POST['opcion'] == 'AccionConsultar') {
 } elseif ($_POST['opcion'] == 'AccionActualizar') {
     error_log("Entrando a AccionActualizar");
 
-    if (isset($_POST["id"], $_POST["estado"], $_POST["fecha"], $_POST["hora_ini"], $_POST["hora_fin"], $_POST["bloque"], $_POST["ambiente"], $_POST["titulacion"])) {
+    if (isset($_POST["id"], $_POST["estado"], $_POST["fecha"], $_POST["fecha_fin"], $_POST["hora_ini"], $_POST["hora_fin"], $_POST["bloque"], $_POST["ambiente"], $_POST["titulacion"])) {
         // Asignar valores recibidos
         $id = $_POST["id"];
         $estado = $_POST["estado"];
         $fecha = $_POST["fecha"];
+        $fecha_fin = $_POST["fecha_fin"];
         $hora_ini = $_POST["hora_ini"];
         $hora_fin = $_POST["hora_fin"];
         $bloque = $_POST["bloque"];
@@ -212,8 +219,8 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $titulacion = $_POST["titulacion"];
 
         $consulta = $con->prepare("SELECT * FROM agenda_ambientes
-            WHERE fecha = ? AND hora_ini >= ? AND hora_fin <= ? AND bloque_id = ? AND ambiente_id = ? AND id <> ?");
-        $consulta->bind_param("ssssii", $fecha, $hora_ini, $hora_fin, $bloque, $ambiente, $id);
+            WHERE fecha = ? AND  fecha_fin = ? AND hora_ini >= ? AND hora_fin <= ? AND bloque_id = ? AND ambiente_id = ? AND id <> ?");
+        $consulta->bind_param("ssssii", $fecha, $fecha_fin, $hora_ini, $hora_fin, $bloque, $ambiente, $id);
         $consulta->execute();
         $resultado = $consulta->get_result();
 
@@ -223,9 +230,9 @@ if ($_POST['opcion'] == 'AccionConsultar') {
             $mensaje = "";
 
             $consulta_update = $con->prepare("UPDATE agenda_ambientes
-                SET fecha = ?, hora_ini = ?, hora_fin = ?, ambiente_id = ?, titulacion_id = ?, estado = ?, bloque_id = ?, usuario_act = 1, fecha_act = CURRENT_TIMESTAMP
+                SET fecha = ?,fecha_fin = ?, hora_ini = ?, hora_fin = ?, ambiente_id = ?, titulacion_id = ?, estado = ?, bloque_id = ?, usuario_act = 1, fecha_act = CURRENT_TIMESTAMP
                 WHERE id = ?");
-            $consulta_update->bind_param("ssssiiii", $fecha, $hora_ini, $hora_fin, $ambiente, $titulacion, $estado, $bloque, $id);
+            $consulta_update->bind_param("ssssiiii", $fecha, $fecha_fin, $hora_ini, $hora_fin, $ambiente, $titulacion, $estado, $bloque, $id);
             $consulta_update->execute();
 
             if ($consulta_update->affected_rows > 0) {

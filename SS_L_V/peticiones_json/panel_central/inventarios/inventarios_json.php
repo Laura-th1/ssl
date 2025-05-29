@@ -68,7 +68,6 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                             dat_inv.id,
                             dat_inv.producto_id,
                             prod.descripcion prod_desc,
-                            dat_inv.cantidad,
                             dat_inv.observacion,
                             dat_inv.estado,
                             prod.numero_placa num_placs,
@@ -87,7 +86,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                     "ID" => $datos["id"],
                     "PRODUC_ID" => $datos["producto_id"],
                     "PROD_DES" => $datos["prod_desc"],
-                    "CANTIDAD" => $datos["cantidad"],
+                    
                     "OBSERVACION" => $datos["observacion"],
                     "ESTADO" => ($datos["estado"] == 1)? "Activo" : "Inactivo",
                     "ESTADO_INT" => $datos["estado"],
@@ -148,7 +147,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $observacion = $_POST["observacion"];
     $producto = $_POST["producto"];
     $id_inv = $_POST["id_inv"];
-    $cantidad = $_POST["cantidad"];
+    
 
 
     $consulta = "SELECT 
@@ -162,8 +161,8 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $alerta                     =                   "OK";
         $mensaje                    =                   "";
 
-        $consulta = "INSERT INTO datos_inventario (inventario_id, producto_id, cantidad, observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
-                            VALUES (".$id_inv.", ".$producto.", ".$cantidad.", '".$observacion."', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
+        $consulta = "INSERT INTO datos_inventario (inventario_id, producto_id,  observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
+                            VALUES (".$id_inv.", ".$producto.",  '".$observacion."', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
         $data                 =               $con->query($consulta);
     }else{
         $alerta                     =                   "ERROR";
@@ -218,14 +217,14 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 } elseif ($_POST['opcion'] == 'AccionActualizarInv') {
     $id = $_POST["id"];
-    $cantidad = $_POST["cantidad"];
+    
     $observacion = $_POST["observacion"];
 
     $alerta                     =                   "OK";
     $mensaje                    =                   "";
 
     $consulta = "UPDATE datos_inventario
-                    SET cantidad = '".$cantidad."',
+                    SET 
                         observacion = '".$observacion."', 
                         usuario_act = 1, 
                         fecha_act = CURRENT_TIMESTAMP

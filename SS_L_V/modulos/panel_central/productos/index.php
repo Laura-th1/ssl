@@ -412,7 +412,7 @@ function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre
                             </div>
                             <div class="col-md-12" id="div_nombre_usuario">
                                 <div class="form-group">
-                                    <label for="nombre_usuario">Nombre del Usuario:</label>
+                                    <label for="nombre_usuario">Nombre del Cuentadante:</label>
                                     <input type="text" class="form-control text-dark bg-white" id="nombre_usuario" name="nombre_usuario" value="${nombre_usuario}" readonly required />
                                     <input type="hidden" id="usuario_id" name="usuario_id" value="${usuario_id || ''}" />
                                 </div>
@@ -550,7 +550,7 @@ function TBProductos(data) {
             },
             {
                 dataField: 'USUARIO', // Columna con el nombre del usuario
-                caption: 'Usuario'
+                caption: 'Cuentadante',
             },
             { dataField: '',
                 caption: 'Acciones',

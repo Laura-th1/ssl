@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             // Saltar encabezado (fila 1)
             if ($row_number === 1) continue;
 
-            // Validar datos mínimos (id, producto_id, cantidad, observacion)
+            // Validar datos mínimos (id, producto_id,  observacion)
             if (count($data) < 4) {
                 $resultados['omitidos']++;
                 $resultados['errores'][] = "Fila $row_number: No tiene suficientes columnas (se esperaban al menos 4)";
@@ -63,16 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             // Obtener y validar datos
             $id = intval($data[0]);
             $producto_id = intval($data[1]);
-            $cantidad = intval($data[2]);
-            $observacion = trim($data[3]);
+            $observacion = trim($data[2]);
            
 
-            // Validación básica de datos
-            if ($producto_id <= 0 || $cantidad < 0) {
-                $resultados['omitidos']++;
-                $resultados['errores'][] = "Fila $row_number: Datos inválidos (producto_id o cantidad)";
-                continue;
-            }
+            
 
             // Verificar si el producto existe
             $query = "SELECT id FROM productos WHERE id = $producto_id LIMIT 1";
@@ -114,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
                 // ACTUALIZAR registro existente
                 $sql = "UPDATE datos_inventario SET
                         producto_id = $producto_id,
-                        cantidad = $cantidad,
                         observacion = '$observacion_esc',
                         usuario_act = $usuario_id,
                         fecha_act = '$fecha'
@@ -127,10 +120,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             } else {
                 // INSERTAR nuevo registro
                 $sql = "INSERT INTO datos_inventario (inventario_id,
-                    producto_id, cantidad, observacion, 
+                    producto_id,  observacion, 
                     estado, usuario_create, fecha_create
                 ) VALUES (
-                    $id, $producto_id, $cantidad, '$observacion_esc', 
+                    $id, $producto_id, '$observacion_esc', 
                     $estado_default, $usuario_id, '$fecha'
                 )";
 
