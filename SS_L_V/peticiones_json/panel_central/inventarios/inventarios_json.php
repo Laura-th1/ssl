@@ -71,8 +71,8 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                             dat_inv.observacion,
                             dat_inv.estado,
                             prod.numero_placa num_placs,
-                            us.nombre us_nombre
-
+                            us.nombre,
+                            us.apellido
                          FROM datos_inventario dat_inv
                          INNER JOIN productos prod ON (prod.id = dat_inv.producto_id)
                          INNER JOIN usuarios us ON (us.id = prod.usuario_id)
@@ -86,12 +86,11 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                     "ID" => $datos["id"],
                     "PRODUC_ID" => $datos["producto_id"],
                     "PROD_DES" => $datos["prod_desc"],
-                    
                     "OBSERVACION" => $datos["observacion"],
                     "ESTADO" => ($datos["estado"] == 1)? "Activo" : "Inactivo",
                     "ESTADO_INT" => $datos["estado"],
                     "NUM_PLAC" => $datos["num_placs"],
-                    "USUARIO" => $datos["us_nombre"]
+                    "USUARIO" => $datos["nombre"] . " " . $datos["apellido"]
                 );
                 $numero++;
             }
