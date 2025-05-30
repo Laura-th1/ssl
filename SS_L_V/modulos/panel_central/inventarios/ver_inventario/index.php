@@ -186,17 +186,34 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                 <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
                                     <div class="row">
                                         <div class="col-sm-12">
-                                            <div class="table-responsive">
+                                            
                                                 <div id="tablaInventario"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                               <div id="totalProductos" class="conteo-productos mt-4 mb-4"></div>
+
+                                         
+        </div>
+        
+         <style>  
+.conteo-productos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.conteo-productos .producto {
+    color: #39a900;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+}
+</style> 
+                                        
             <footer class="footer"> © <?php echo date('Y'); ?> - Sena Stock </footer>
         </div>
     </div>
@@ -392,7 +409,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         }
                     }
                     }
-                ],
+                ], 
                 showBorders: true,
                 paging: {
                     enabled: true,
@@ -530,6 +547,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                     alert("No se seleccionó ningún archivo.");
                 }
             });
+            
 
             // Simular un clic para abrir el selector de archivos
             input.click();
@@ -537,36 +555,69 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     },
     location: 'after'
 }
+
                     ]
                 }
             });
         }
+        function contarArticulosFiltrados(dataArray) {
+    const conteo = {};
+
+    dataArray.forEach(row => {
+        const nombre = row.PROD_DES;
+        if (nombre) {
+            conteo[nombre] = (conteo[nombre] || 0) + 1;
+        }
+    });
+
+    const totalContainer = document.getElementById("totalProductos");
+    if (totalContainer) {
+        totalContainer.innerHTML = ""; // Limpiar antes de agregar
+
+        for (const [producto, cantidad] of Object.entries(conteo)) {
+            const item = document.createElement("div");
+            item.className = "producto";
+            item.innerHTML = `<strong>${producto}</strong>: ${cantidad}` + " articulo(s)";
+            item.style.backgroundColor = "#f0f0f0"; // Color de fondo claro
+            totalContainer.appendChild(item);
+        }
+
+        if (Object.keys(conteo).length === 0) {
+            totalContainer.innerHTML = `<div class="producto">No hay articulos registrados</div>`;
+        }
+    }
+}
+
+
 
         function consultas(accion) {
-            if (accion == 'Inventario') {
-                requisitos("POST",
-                    "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                    "opcion=AccionConsultar&accion=ConsultarUno&id_inv="+id_inventario+"&jsonp=?",
-                    function(data) {
-                        TBInventario(data);
-                    },
-                    "",
-                    Array()
-                );
-            }else if (accion == 'productos') {
-                requisitos("POST",
-                    "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                    "opcion=AccionConsultar&accion=ConsultarProductos&jsonp=?",
-                    function(data) {
-                        $.each(data["DATA"], function(index, option) {
-                            $('#producto').append($('<option></option>').val(option.ID).text(option.DESCRIPCION));
-                        });
-                    },
-                    "",
-                    Array()
-                );
-            }
-        }
+    if (accion == 'Inventario') {
+        requisitos("POST",
+            "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+            "opcion=AccionConsultar&accion=ConsultarUno&id_inv=" + id_inventario + "&jsonp=?",
+            function(data) {
+                TBInventario(data); // Pintar la tabla
+
+                // Ejecutar conteo de artículos por nombre
+                contarArticulosFiltrados(data["DATA"]);
+            },
+            "",
+            Array()
+        );
+    } else if (accion == 'productos') {
+        requisitos("POST",
+            "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+            "opcion=AccionConsultar&accion=ConsultarProductos&jsonp=?",
+            function(data) {
+                $.each(data["DATA"], function(index, option) {
+                    $('#producto').append($('<option></option>').val(option.ID).text(option.DESCRIPCION));
+                });
+            },
+            "",
+            Array()
+        );
+    }
+}
 
           // Button configuration for CSV import
 var importCsvOption = {
