@@ -159,7 +159,7 @@ if (!isset($_SESSION['USUARIO'])) {
                         <br>
     
                         <div class="container">
-    <h2 class="text-themecolor">CREDENCIALES</h2>
+    <h2 class="text-themecolor">CREDENCIALES <p> ID: <?php echo htmlspecialchars($_SESSION['ID']); ?></p></h2>
 
     <div class="profile-info">
         <h3 class="text-themecolor">Nombres:</h3>

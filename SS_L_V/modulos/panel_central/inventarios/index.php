@@ -537,8 +537,8 @@ function TBInventarios(data) {
             dataSource: data["DATA"],   // Pasamos los datos correctamente
             columns: [
                 { dataField: 'NUMERO', caption: 'N°', width: 100 },
+                { dataField: 'NOMBRE', caption: 'Ambiente' }, // Cambiado de DESCRIPCION a NOMBRE
                 { dataField: 'BLOQ_DESC', caption: 'Bloque' },
-                { dataField: 'NOMBRE', caption: 'Nombre' }, // Cambiado de DESCRIPCION a NOMBRE
                 { dataField: 'OBSERVACION', caption: 'Observacion' },
                 { dataField: 'ESTADO', caption: 'Estado' },
                 {

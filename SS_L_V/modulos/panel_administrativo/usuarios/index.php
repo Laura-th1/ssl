@@ -151,123 +151,10 @@ if (!isset($_SESSION['USUARIO'])) {
                                     <div class="row">
                                         <div class="col-sm-12">
                                             <div class="table-responsive">
-                                                <!-- <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>N°</th>
-                                                            <th>Tipo de Documento</th>
-                                                            <th>Numero de Documento</th>
-                                                            <th>Nombres y Apellidos</th>
-                                                            <th>Rol</th>
-                                                            <th>Fecha de Nacimiento</th>
-                                                            <th>Estado</th>
-                                                            <th>Acciones</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>1</td>
-                                                            <td>Cédula de Ciudadanía</td>
-                                                            <td>1234567890</td>
-                                                            <td>Juan Pérez</td>
-                                                            <td>Administrador</td>
-                                                            <td>1985-05-10</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Ciudadanía', '1234567890', 'Juan Pérez', 'Administrador', '1985-05-10', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>2</td>
-                                                            <td>Cédula de Ciudadanía</td>
-                                                            <td>2345678901</td>
-                                                            <td>María Rodríguez</td>
-                                                            <td>Usuario</td>
-                                                            <td>1990-07-15</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Ciudadanía', '2345678901', 'María Rodríguez', 'Usuario', '1990-07-15', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>3</td>
-                                                            <td>Cédula de Ciudadanía</td>
-                                                            <td>3456789012</td>
-                                                            <td>Carlos García</td>
-                                                            <td>Supervisor</td>
-                                                            <td>1988-02-20</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Ciudadanía', '3456789012', 'Carlos García', 'Supervisor', '1988-02-20', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>4</td>
-                                                            <td>Pasaporte</td>
-                                                            <td>4567890123</td>
-                                                            <td>Lucía Martínez</td>
-                                                            <td>Usuario</td>
-                                                            <td>1995-09-30</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Pasaporte', '4567890123', 'Lucía Martínez', 'Usuario', '1995-09-30', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>5</td>
-                                                            <td>Cédula de Extranjería</td>
-                                                            <td>5678901234</td>
-                                                            <td>José Fernández</td>
-                                                            <td>Administrador</td>
-                                                            <td>1982-12-25</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Extranjería', '5678901234', 'José Fernández', 'Administrador', '1982-12-25', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>6</td>
-                                                            <td>Cédula de Ciudadanía</td>
-                                                            <td>6789012345</td>
-                                                            <td>Ana Gómez</td>
-                                                            <td>Usuario</td>
-                                                            <td>1993-11-12</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Ciudadanía', '6789012345', 'Ana Gómez', 'Usuario', '1993-11-12', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>7</td>
-                                                            <td>Pasaporte</td>
-                                                            <td>7890123456</td>
-                                                            <td>David Sánchez</td>
-                                                            <td>Supervisor</td>
-                                                            <td>1987-08-18</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Pasaporte', '7890123456', 'David Sánchez', 'Supervisor', '1987-08-18', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>8</td>
-                                                            <td>Cédula de Extranjería</td>
-                                                            <td>8901234567</td>
-                                                            <td>Sofía López</td>
-                                                            <td>Usuario</td>
-                                                            <td>1992-03-22</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Extranjería', '8901234567', 'Sofía López', 'Usuario', '1992-03-22', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>9</td>
-                                                            <td>Cédula de Ciudadanía</td>
-                                                            <td>9012345678</td>
-                                                            <td>Miguel Ramírez</td>
-                                                            <td>Administrador</td>
-                                                            <td>1984-06-05</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Cédula de Ciudadanía', '9012345678', 'Miguel Ramírez', 'Administrador', '1984-06-05', 0);">Editar</button></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>10</td>
-                                                            <td>Pasaporte</td>
-                                                            <td>0123456789</td>
-                                                            <td>Laura Torres</td>
-                                                            <td>Usuario</td>
-                                                            <td>1991-04-27</td>
-                                                            <td>Activo</td>
-                                                            <td><button class="btn text-white" style="background-color: #39a900;" onclick="Editar('Pasaporte', '0123456789', 'Laura Torres', 'Usuario', '1991-04-27', 0);">Editar</button></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table> -->
+                                                 
                                                 <div id="tablaUsuarios"></div>
+                                                
+                                                
                                             </div>
                                         </div>
                                     </div>
@@ -498,37 +385,48 @@ if (!isset($_SESSION['USUARIO'])) {
             tabla_datos_usuarios = $("#tablaUsuarios").dxDataGrid({
                 dataSource: data["DATA"],
                 columns: [{
-                        dataField: 'NUMERO',
-                        caption: 'N°',
+                        dataField: 'ID',
+                        caption: 'ID',
                         width: 100
                     },
                     {
-                        dataField: 'IDENTIFICACION',
-                        caption: 'Identificacion'
+                        dataField: 'TIPO_DOCUMENTO_DESC',
+                        caption: 'Tipo de Documento',
+                    },
+                    {
+                        dataField: 'NUMERO_DOCUMENTO',
+                        caption: 'Numero de Documento',
                     },
                     {
                         dataField: 'NOMBRE_COMPLETO',
-                        caption: 'Nombre'
-                    },
-                    {
-                        dataField: 'FECHA_NACIMIENTO',
-                        caption: 'Fecha Nacimiento'
-                    },
-                    {
-                        dataField: 'SEXO_DESC',
-                        caption: 'Genero'
+                        caption: 'Nombres y Apellidos',
                     },
                     {
                         dataField: 'ROL_DESC',
                         caption: 'Rol'
                     },
                     {
-                        dataField: 'TELEFONO',
-                        caption: 'Telefono'
+                        dataField: 'CORREO',
+                        caption: 'Correo Electronico'
                     },
                     {
-                        dataField: 'ESTADO',
-                        caption: 'Estado'
+                        dataField: 'USUARIO',
+                        caption: 'Usuario'
+                    },
+                    {
+                        dataField: 'FOTO',
+                        caption: 'Foto',
+                        cellTemplate: function(container, options) {
+                            if (options.data.FOTO) {
+                                $('<img>').attr({
+                                    src: options.data.FOTO,
+                                    alt: 'Foto de Usuario',
+                                    style: 'width: 50px; height: 50px; border-radius: 50%;'
+                                }).appendTo(container);
+                            } else {
+                                $('<span>').text('No disponible').appendTo(container);
+                            }
+                        }
                     },
                     {
                         dataField: '',
