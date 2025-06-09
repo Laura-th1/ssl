@@ -312,6 +312,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                         var password = $("#password").val();
                                         var telefono = $("#telefono").val();
                                         
+                                        
                                         var formData = new FormData();
                                         formData.append('foto', $('#foto')[0].files[0]);
                                         formData.append('tp_documento', $("#tp_documentos").val());
@@ -390,10 +391,6 @@ if (!isset($_SESSION['USUARIO'])) {
                         width: 100
                     },
                     {
-                        dataField: 'TIPO_DOCUMENTO_DESC',
-                        caption: 'Tipo de Documento',
-                    },
-                    {
                         dataField: 'NUMERO_DOCUMENTO',
                         caption: 'Numero de Documento',
                     },
@@ -429,17 +426,42 @@ if (!isset($_SESSION['USUARIO'])) {
                         }
                     },
                     {
-                        dataField: '',
-                        caption: 'Acciones',
-                        cellTemplate: function(container, options) {
-                            $(`<td>
-                                <button class="btn text-white me-0 btn-sm" style="background-color: #ff0000; color: #ffffff;" onclick="Eliminar(${options.data.ID});">
-                                    Eliminar
-                                </button>
-                            </td>`).appendTo(container);
-                        }
-                    }
+                        dataField: 'ESTADO',
+                        caption: 'Estado'
+                    },
+                    {
+    dataField: '',
+    caption: 'Acciones',
+    cellTemplate: function(container, options) {
+        // Suponiendo que ESTADO es 1 (activo) o 0 (inactivo)
+        let esActivo = options.data.ESTADO == 1 || options.data.ESTADO === "Activo";
+        let texto = esActivo ? 'Deshabilitar' : 'Habilitar';
+        let color = esActivo ? '#67757c' : '#39a900';
+
+        // Botón para cambiar estado
+        $('<button>')
+            .addClass('btn text-white me-2 btn-sm')
+            .css('background-color', color)
+            .text(texto)
+            .on('click', function () {
+                cambiarEstado(options.data.ID, esActivo ? 0 : 1);
+            })
+            .appendTo(container);
+
+        // Botón de eliminar 
+        $('<button>')
+            .addClass('btn text-white btn-sm')
+            .css('background-color', '#ff0000')
+            .text('Eliminar')
+            .on('click', function () {
+                Eliminar(options.data.ID);
+            })
+            .appendTo(container);
+    }
+}
+                    
                 ],
+                   
                 showBorders: true,
                 paging: {
                     enabled: true,
@@ -465,7 +487,7 @@ if (!isset($_SESSION['USUARIO'])) {
                 },
                 export: {
                     enabled: true,
-                    fileName: 'Departamentos',
+                    fileName: 'Usuarios',
                     allowExportSelectedData: true,
                     texts: {
                         exportAll: 'Exportar todo',
@@ -489,9 +511,9 @@ if (!isset($_SESSION['USUARIO'])) {
                                 icon: 'exportxlsx',
                                 text: 'Exportar a Excel',
                                 onClick: function() {
-                                    const grid = $("#tablaDepartamentos").dxDataGrid("instance");
+                                    const grid = $("#tablaUsuarios").dxDataGrid("instance");
                                     const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Departamentos');
+                                    const worksheet = workbook.addWorksheet('Usuarios');
 
                                     DevExpress.excelExporter.exportDataGrid({
                                         component: grid,
@@ -500,7 +522,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                         workbook.xlsx.writeBuffer().then(buffer => {
                                             saveAs(new Blob([buffer], {
                                                 type: 'application/octet-stream'
-                                            }), 'Departamentos.xlsx');
+                                            }), 'Usuarios.xlsx');
                                         });
                                     });
                                 }
@@ -513,9 +535,9 @@ if (!isset($_SESSION['USUARIO'])) {
                                 icon: 'export',
                                 text: 'Exportar a CSV',
                                 onClick: function() {
-                                    const grid = $("#tablaDepartamentos").dxDataGrid("instance");
+                                    const grid = $("#tablaUsuarios").dxDataGrid("instance");
                                     const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Departamentos');
+                                    const worksheet = workbook.addWorksheet('Usuarios');
 
                                     DevExpress.excelExporter.exportDataGrid({
                                         component: grid,
@@ -524,7 +546,7 @@ if (!isset($_SESSION['USUARIO'])) {
                                         workbook.csv.writeBuffer().then(buffer => {
                                             saveAs(new Blob([buffer], {
                                                 type: 'text/csv'
-                                            }), 'Departamentos.csv');
+                                            }), 'Usuarios.csv');
                                         });
                                     });
                                 }
@@ -585,7 +607,40 @@ if (!isset($_SESSION['USUARIO'])) {
                 );
             }
         }
-             
+        // La función JavaScript para cambiar el estado de un usuario
+function cambiarEstado(id, nuevoEstado) {
+    $.ajax({
+        url: "../../../peticiones_json/panel_administrativo/usuarios/usuarios_json.php", // La URL a tu script PHP
+        type: "POST", // Método HTTP para enviar los datos
+        data: { // Datos que se envían al servidor
+            opcion: "AccionCambiarEstado", // Indica al PHP qué acción realizar
+            id: id,                       // El ID del usuario
+            estado: nuevoEstado           // El nuevo estado
+        },
+        dataType: "json", // Tipo de dato esperado en la respuesta del servidor (JSON)
+        success: function(data) {
+            console.log("Respuesta:", data); // Para depurar: muestra la respuesta del servidor en la consola
+
+            if (data["ALERTA"] === 'OK') {
+                // Si la operación fue exitosa en el servidor
+                ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Estado actualizado con éxito', ''); // Muestra una notificación de éxito
+
+                // Recarga solo la tabla DevExtreme sin refrescar toda la página
+                $("#tablaUsuarios").dxDataGrid("instance").refresh();
+            } else {
+                // Si hubo un error reportado por el servidor
+                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], ''); // Muestra una notificación de error con el mensaje del servidor
+            }
+        },
+        error: function(xhr, status, error) {
+            // Si la petición AJAX falla (ej. problema de red, URL incorrecta, error de servidor no capturado por el success)
+            console.error("Error en la petición AJAX:", error); // Muestra el error técnico en la consola
+            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Hubo un problema de comunicación con el servidor.', ''); // Muestra un mensaje de error genérico al usuario
+        }
+    });
+}
+
+
     function cerrarSesion(event) {
     event.preventDefault();
 

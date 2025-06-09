@@ -1,5 +1,4 @@
 <?php
-
     function conectar(){
         $host = "localhost";
         $user = "root";  
@@ -9,5 +8,4 @@
         mysqli_select_db($con,$bd);
         return $con;
     }
-
 ?>

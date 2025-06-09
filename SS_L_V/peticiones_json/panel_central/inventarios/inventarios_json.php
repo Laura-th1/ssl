@@ -6,6 +6,7 @@ $con = conectar();
 $alerta = "";
 $mensaje = "";
 
+
 if ($_POST['opcion'] == 'AccionConsultar') {
     if ($_POST['accion'] == 'ConsultarTodos') {
         $data = [];
@@ -116,6 +117,30 @@ if ($_POST['opcion'] == 'AccionConsultar') {
                 }
             }
         print json_encode(array("DATA" => $data));
+    } elseif ($_POST['accion'] == 'ConsultarTodosExceptoUno') {
+        // Devuelve todos los inventarios excepto el actual (para mover artículos)
+        if (!isset($_POST['id_inv_excluir'])) {
+            echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "ID de inventario a excluir no proporcionado."]);
+            exit;
+        }
+        $id_inv_excluir = $_POST['id_inv_excluir'];
+        $consulta = "SELECT inventario_id AS ID, nombre AS NOMBRE_INVENTARIO FROM inventarios WHERE inventario_id <> ?";
+        $stmt = $con->prepare($consulta);
+        if ($stmt === false) {
+            error_log("Error al preparar la consulta ConsultarTodosExceptoUno: " . $con->error);
+            echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Error interno del servidor al preparar consulta."]);
+            exit;
+        }
+        $stmt->bind_param("i", $id_inv_excluir);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = [];
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+        $stmt->close();
+        echo json_encode(["ALERTA" => "OK", "DATA" => $data]);
+        exit;
     }
 } elseif ($_POST['opcion'] == 'AccionInsertar') {
     $nombre = $_POST["nombre"];
@@ -237,4 +262,30 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $data                 =               $con->query($consulta);
 
     print json_encode(array("ALERTA" => "OK"));
+} elseif ($_POST['opcion'] == 'AccionMoverProducto') {
+    // Mueve un producto de un inventario a otro
+    // El frontend envía id_inventario_producto (ID de datos_inventario)
+    if (!isset($_POST['id_inventario_producto'], $_POST['id_inventario_destino'])) {
+        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Parámetros incompletos para mover producto."]);
+        exit;
+    }
+    $id_inventario_producto = $_POST['id_inventario_producto'];
+    $id_inventario_destino = $_POST['id_inventario_destino'];
+
+    // Actualiza el inventario_id del producto en datos_inventario
+    $consulta = "UPDATE datos_inventario SET inventario_id = ?, usuario_act = 1, fecha_act = CURRENT_TIMESTAMP WHERE id = ?";
+    $stmt = $con->prepare($consulta);
+    if ($stmt === false) {
+        error_log("Error al preparar la consulta para mover producto: " . $con->error);
+        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Error interno del servidor al preparar consulta."]);
+        exit;
+    }
+    $stmt->bind_param("ii", $id_inventario_destino, $id_inventario_producto);
+    if ($stmt->execute()) {
+        echo json_encode(["ALERTA" => "OK", "MENSAJE" => "Producto movido correctamente."]);
+    } else {
+        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Error al mover el producto: " . $stmt->error]);
+    }
+    $stmt->close();
+    exit;
 }

@@ -12,6 +12,46 @@ $con                        =                   conectar();
 $alerta                     =                   "";
 $mensaje                    =                   "";
 
+
+
+
+// Función para cambiar el estado del usuario
+if ($_POST['opcion'] == 'AccionCambiarEstado') {
+    $id = intval($_POST['id']);
+    $estado = intval($_POST['estado']);
+
+    // Prepara la consulta SQL de forma segura usando placeholders (?)
+    $consulta = "UPDATE usuarios SET estado = ? WHERE id = ?";
+
+    // Crea una sentencia preparada
+    $stmt = $con->prepare($consulta);
+
+    // Verifica si la preparación de la sentencia falló
+    if ($stmt === false) {
+        // Registra el error para depuración (no muestres errores internos directamente al usuario en producción)
+        error_log("Error al preparar la consulta para AccionCambiarEstado: " . $con->error);
+        print json_encode(array("ALERTA" => "ERROR", "MENSAJE" => "Error interno del servidor al procesar la solicitud."));
+    } else {
+        // Vincula los parámetros a los placeholders
+        // "ii" significa que ambos parámetros son enteros (integer)
+        $stmt->bind_param("ii", $estado, $id);
+
+        // Ejecuta la sentencia preparada
+        $data = $stmt->execute();
+
+        if ($data) {
+            print json_encode(array("ALERTA" => "OK"));
+        } else {
+            // Obtiene el error de la ejecución de la sentencia
+            error_log("Error al ejecutar la consulta para AccionCambiarEstado: " . $stmt->error);
+            print json_encode(array("ALERTA" => "ERROR", "MENSAJE" => "Error al actualizar el estado del usuario: " . $stmt->error));
+        }
+
+        // Cierra la sentencia
+        $stmt->close();
+    }
+}
+
 if ($_POST['opcion'] == 'AccionConsultar') {
     if ($_POST['accion'] == 'ConsultarTodos') {
 
@@ -259,3 +299,4 @@ print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 
 //fin 
 
+?>

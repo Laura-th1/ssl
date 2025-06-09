@@ -263,6 +263,13 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-12" id="div_numero_placa">
+                                            <div class="form-group">
+                                                <label for="numero_placa">N° de Placa:</label>
+                                                <input type="text" class="form-control text-dark bg-white" id="numero_placa" name="numero_placa" placeholder="N° de Placa" required />
+                                                <input type="hidden" id="producto_id" name="producto_id" />
+                                             </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="observacion">Observación:</label>
@@ -371,6 +378,74 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
             });
         }
 
+ // New function to handle moving an item
+        function MoverArticulo(Producto_id, currentInvId) {
+            $.confirm({
+                title: 'Mover Artículo',
+                content: `<div class="form-group">
+                              <label for="destinoInventario">Seleccione el inventario de destino:</label>
+                              <select class="form-control text-dark bg-white" id="destinoInventario"></select>
+                          </div>`,
+                buttons: {
+                    cancel: {
+                        text: 'Cancelar',
+                        btnClass: 'btn-danger'
+                    },
+                    move: {
+                        text: 'Mover',
+                        btnClass: 'btn-success',
+                        action: function() {
+                            var destinoInventarioId = $('#destinoInventario').val();
+                            if (destinoInventarioId) {
+                                if (destinoInventarioId == currentInvId) {
+                                    ModalNotifi('col-md-4 col-md-offset-4', 'Advertencia', 'El artículo ya se encuentra en este inventario.', '');
+                                    return false;
+                                }
+                                requisitos("POST",
+                                    "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+                                    "opcion=AccionMoverProducto&id_producto=" + Producto_id + "&id_inventario_destino=" + destinoInventarioId + "&jsonp=?",
+                                    function(data) {
+                                        if (data["ALERTA"] == 'OK') {
+                                            consultas("Inventario"); // Refresh the current inventory
+                                            ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Artículo movido con éxito', '');
+                                        } else {
+                                            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
+                                        }
+                                    },
+                                    "",
+                                    Array()
+                                );
+                            } else {
+                                ModalNotifi('col-md-4 col-md-offset-4', 'Advertencia', 'Debe seleccionar un inventario de destino.', '');
+                                return false; // Prevent closing the modal
+                            }
+                        }
+                    }
+                },
+                onContentReady: function() {
+                    var jc = this;
+                    // Populate the dropdown with available inventories (excluding the current one)
+                    requisitos("POST",
+                        "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+                        "opcion=AccionConsultar&accion=ConsultarTodosExceptoUno&id_inv_excluir=" + currentInvId + "&jsonp=?",
+                        function(data) {
+                            if (data["ALERTA"] == 'OK') {
+                                $.each(data["DATA"], function(index, inventario) {
+                                   $('#destinoInventario').append($('<option></option>').val(inventario.ID).text(inventario.NOMBRE_INVENTARIO));
+                                });
+                            } else {
+                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error al cargar inventarios: ' + data["MENSAJE"], '');
+                                jc.close();
+                            }
+                        },
+                        "",
+                        Array()
+                    );
+                }
+            });
+        }
+
+
         function TBInventario(data) {
             tabla_datos_inventario = $("#tablaInventario").dxDataGrid({
                 dataSource: data["DATA"],
@@ -397,16 +472,22 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         dataField: '',
                         caption: 'Acciones',
                         cellTemplate: function(container, options) {
-                            if (rolPermitido) {
-                                $(`<td>
-                                <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.OBSERVACION}');"> 
-                                    Editar
-                                </button>
-                                <button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;" onclick="Eliminar(${options.data.ID});"> 
-                                    Eliminar
-                                </button>
-                            </td>`).appendTo(container);
-                        }
+    if (rolPermitido) {
+        $('<button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;">Editar</button>')
+            .on('click', function() {
+                Editar(options.data.ID, options.data.OBSERVACION);
+            }).appendTo(container);
+
+        $('<button class="btn text-white me-0 btn-sm" style="background-color: #007bff; color: #ffffff;">Mover</button>')
+            .on('click', function() {
+                MoverArticulo(options.data.ID, id_inventario);
+            }).appendTo(container);
+
+        $('<button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;">Eliminar</button>')
+            .on('click', function() {
+                Eliminar(options.data.ID);
+            }).appendTo(container);
+    }
                     }
                     }
                 ], 

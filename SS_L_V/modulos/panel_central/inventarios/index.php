@@ -369,7 +369,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="nombre">Nombre:</label>
+                                            <label for="nombre">Ambiente:</label>
                                             <input type="text" class="form-control text-dark bg-white" id="nombre" name="nombre" placeholder="Ingresar el nombre" value="${nombre}"/>
                                         </div>
                                     </div>
@@ -549,10 +549,13 @@ function TBInventarios(data) {
                         verButton.on('click', () => VerInventario(options.data.ID));
                         verButton.appendTo(container);
 
+
                         if (rolPermitido) {
                             const editarButton = $(`<button class="btn btn-sm text-white" style="background-color: #39a900;">Editar</button>`);
                             editarButton.on('click', () => Editar(options.data.ID, options.data.NOMBRE, options.data.BLOQ_ID, options.data.OBSERVACION, options.data.ESTADO_INT));
                             editarButton.appendTo(container);
+                        
+
                         }
                     }
                 }
