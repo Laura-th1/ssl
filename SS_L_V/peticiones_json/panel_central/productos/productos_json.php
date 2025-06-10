@@ -45,7 +45,8 @@ elseif ($_POST['opcion'] == 'AccionConsultar') {
                     "OBSERVACION"       => $datos["observacion"],
                     "ESTADO"            => ($datos["estado"] == 1) ? "Activo" : "Inactivo",
                     "ESTADO_INT"        => $datos["estado"],
-                    "USUARIO"           => $datos["nombre_usuario"] ?? "Sin asignar"
+                    "USUARIO"           => $datos["nombre_usuario"] ?? "Sin asignar",
+                    "IMAGEN"            => $datos["imagen"] ?? "Sin imagen" // Nuevo campo
                 );
                 $numero++;
             }
@@ -53,13 +54,13 @@ elseif ($_POST['opcion'] == 'AccionConsultar') {
         print json_encode(array("DATA" => $data));
     }
 }
-
 // Insertar producto
 elseif ($_POST['opcion'] == 'AccionInsertar') {
     $nombre = $_POST["nombre"];
     $numero_placa = $_POST["numero_placa"];
     $observacion = $_POST["observacion"];
-    $usuario_id = $_POST["usuario_id"];  // ID del usuario que crea el producto
+    $usuario_id = $_POST["usuario_id"];
+    $imagen = guardarImagen('imagen');
 
     $consulta = "SELECT * FROM productos WHERE descripcion = '".$nombre."'";
     $data_con = $con->query($consulta);
@@ -68,8 +69,8 @@ elseif ($_POST['opcion'] == 'AccionInsertar') {
         $alerta = "OK";
         $mensaje = "";
 
-        $consulta = "INSERT INTO productos (descripcion, numero_placa, observacion, estado, usuario_create, usuario_id, usuario_act, fecha_create, fecha_act)
-                        VALUES ('".$nombre."','".$numero_placa."', '".$observacion."', 1, 1, '".$usuario_id."', NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
+        $consulta = "INSERT INTO productos (descripcion, numero_placa, observacion, estado, usuario_create, usuario_id, usuario_act, fecha_create, fecha_act, imagen)
+                        VALUES ('".$nombre."','".$numero_placa."', '".$observacion."', 1, 1, '".$usuario_id."', NULL, CURRENT_TIMESTAMP, CURRENT_DATE, ".($imagen ? "'".$con->real_escape_string($imagen)."'" : "NULL").")";
         $data = $con->query($consulta);
     } else {
         $alerta = "ERROR";
@@ -79,14 +80,14 @@ elseif ($_POST['opcion'] == 'AccionInsertar') {
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 }
 
-// Actualizar producto
 elseif ($_POST['opcion'] == 'AccionActualizar') {
     $id = $_POST["id"];
     $nombre = $_POST["nombre"];
     $numero_placa = $_POST["numero_placa"];
     $observacion = $_POST["observacion"];
     $estado = $_POST["estado"];
-    $usuario_id = $_POST["usuario_id"];  // ID del usuario que actualiza el producto
+    $usuario_id = $_POST["usuario_id"];
+    $imagen = guardarImagen('imagen');
 
     $consulta = "SELECT * FROM productos WHERE descripcion = '".$nombre."' AND id <> '".$id."'";
     $data_con = $con->query($consulta);
@@ -94,6 +95,8 @@ elseif ($_POST['opcion'] == 'AccionActualizar') {
     if ($data_con->num_rows == 0) {
         $alerta = "OK";
         $mensaje = "";
+
+        $setImagen = $imagen ? ", imagen = '".$con->real_escape_string($imagen)."'" : "";
 
         $consulta = "UPDATE productos
                         SET descripcion = '".$nombre."',
@@ -103,6 +106,7 @@ elseif ($_POST['opcion'] == 'AccionActualizar') {
                             usuario_id = '".$usuario_id."',
                             usuario_act = 1, 
                             fecha_act = CURRENT_TIMESTAMP
+                            $setImagen
                         WHERE id = '".$id."';";
         $data = $con->query($consulta);
     } else {
@@ -112,3 +116,24 @@ elseif ($_POST['opcion'] == 'AccionActualizar') {
 
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 }
+
+
+function guardarImagen($inputName = 'imagen') {
+    $rutaFinal = null;
+    if (isset($_FILES[$inputName]) && $_FILES[$inputName]['error'] == UPLOAD_ERR_OK) {
+        // Ruta absoluta en el servidor
+        $dir = dirname(__DIR__, 3) . '/uploads/productos/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        $nombreArchivo = uniqid('prod_') . '_' . basename($_FILES[$inputName]['name']);
+        $ruta = $dir . $nombreArchivo;
+        if (move_uploaded_file($_FILES[$inputName]['tmp_name'], $ruta)) {
+            // Ruta relativa para guardar en la BD (accesible por el navegador)
+            $rutaFinal = '/ssl/SS_L_V/uploads/productos/' . $nombreArchivo;
+        }
+    }
+    return $rutaFinal;
+}
+
+?>
