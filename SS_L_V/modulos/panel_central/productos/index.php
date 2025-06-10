@@ -68,6 +68,17 @@ $rolPermitido1 = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrad
 </script>
 </head>
 
+<!-- Modal para mostrar la imagen ampliada -->
+<div class="modal fade" id="modalImagenGrande" tabindex="-1" aria-labelledby="modalImagenGrandeLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="imagenGrande" src="" alt="Imagen ampliada" style="max-width:100%; max-height:70vh; border-radius:10px;">
+      </div>
+    </div>
+  </div>
+</div>
+
 <body class="fix-header fix-sidebar card-no-border">
     <div class="preloader">
         <div class="loader">
@@ -260,7 +271,7 @@ function CrearNueva() {
         closeIcon: false,
         columnClass: 'col-md-offset-2 col-md-8',
         content: `<div class="panel panel-body">
-                    <form id="">
+                    <form id="formCrearProducto" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-12" id="div_nickname">
                                 <div class="form-group">
@@ -293,6 +304,12 @@ function CrearNueva() {
                                     <input type="hidden" id="usuario_id" name="usuario_id" />
                                 </div>
                             </div>
+                            <div class="col-md-12" id="div_imagen">
+                                <div class="form-group">
+                                    <label for="imagen">Imagen:</label>
+                                    <input type="file" class="form-control text-dark bg-white" id="imagen" name="imagen" accept="image/*" />
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>`,
@@ -305,39 +322,45 @@ function CrearNueva() {
             guardar: {
                 text: 'Guardar',
                 btnClass: 'btn btn-green',
-                action: function(saveButton) {
-                    var nombre = $("#nombre").val();
-                    var numero_placa = $("#numero_placa").val();
-                    var observacion = $("#observacion").val();
-                    var documento = $("#documento").val();
-                    var nombre_usuario = $("#nombre_usuario").val();
-                    var usuario_id = $("#usuario_id").val();
-                    
-                    console.log("Usuario ID a enviar:", usuario_id); // Para depuración
-                    
-                    if (!documento || !nombre_usuario || !usuario_id) {
+                action: function() {
+                    var form = document.getElementById('formCrearProducto');
+                    var formData = new FormData(form);
+                    formData.append('opcion', 'AccionInsertar');
+                    formData.append('nombre', $("#nombre").val());
+                    formData.append('numero_placa', $("#numero_placa").val());
+                    formData.append('observacion', $("#observacion").val());
+                    formData.append('documento', $("#documento").val());
+                    formData.append('imagen', $('#imagen')[0].files[0]);
+                    formData.append('usuario_id', $("#usuario_id").val());
+
+                    if (!$("#documento").val() || !$("#nombre_usuario").val() || !$("#usuario_id").val()) {
                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Debe ingresar un número de documento válido y seleccionar un usuario', '');
                         return false;
                     }
 
-                    requisitos("POST",
-                        "../../../peticiones_json/panel_central/productos/productos_json.php",
-                        "opcion=AccionInsertar&nombre=" + nombre +"&numero_placa=" + numero_placa + "&observacion=" + observacion + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
-                        function(data) {
+                    $.ajax({
+                        url: "../../../peticiones_json/panel_central/productos/productos_json.php",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: "json",
+                        success: function(data) {
                             if (data["ALERTA"] == 'OK') {
+                                crear.close();
                                 consultas("Productos");
                                 ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Insertado Con Exito', '');
-                                return true;
                             } else if (data["ALERTA"] == 'ERROR') {
-                                crear.close();
-                                CrearNueva();
                                 ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
-                                return false;
+                            } else {
+                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error inesperado', '');
                             }
                         },
-                        "",
-                        []
-                    );
+                        error: function(xhr, status, error) {
+                            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error en la petición AJAX: ' + error, '');
+                        }
+                    });
+                    return false; // Siempre retorna false para que el modal no se cierre automáticamente
                 }
             }
         },
@@ -377,14 +400,14 @@ function CrearNueva() {
     });
 }
 
-function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre_usuario, usuario_id) {
+function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre_usuario, usuario_id, imagen) {
     crear = $.confirm({
         title: 'Editar Articulo',
         backgroundDismiss: false,
         closeIcon: false,
         columnClass: 'col-md-offset-2 col-md-8',
         content: `<div class="panel panel-body">
-                    <form id="formRestPassw">
+                    <form id="formEditarProducto" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-12" id="div_nickname">
                                 <div class="form-group">
@@ -430,6 +453,13 @@ function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-12" id="div_imagen">
+                                <div class="form-group">
+                                    <label for="imagen">Imagen:</label>
+                                    <input type="file" class="form-control text-dark bg-white" id="imagen" name="imagen" accept="image/*" />
+                                    ${imagen ? `<img src="${imagen}" style="width:50px;height:50px;margin-top:5px;">` : ''}
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>`,
@@ -442,39 +472,46 @@ function Editar(id, nombre, numero_placa, observacion, estado, documento, nombre
             actualizar: {
                 text: 'Actualizar',
                 btnClass: 'btn btn-green',
-                action: function(saveButton) {
-                    var nombre = $("#nombre").val();
-                    var numero_placa = $("#numero_placa").val();
-                    var observacion = $("#observacion").val();
-                    var estado_new = $('input[name="estado"]:checked').val();
-                    var documento = $("#documento").val();
-                    var nombre_usuario = $("#nombre_usuario").val();
-                    var usuario_id = $("#usuario_id").val();
-                    
-                    console.log("Usuario ID a actualizar:", usuario_id); // Para depuración
-                    
-                    if (!documento || !nombre_usuario || !usuario_id) {
+                action: function() {
+                    var form = document.getElementById('formEditarProducto');
+                    var formData = new FormData(form);
+                    formData.append('opcion', 'AccionActualizar');
+                    formData.append('id', id);
+                    formData.append('nombre', $("#nombre").val());
+                    formData.append('numero_placa', $("#numero_placa").val());
+                    formData.append('observacion', $("#observacion").val());
+                    formData.append('estado', $('input[name="estado"]:checked').val());
+                    formData.append('documento', $("#documento").val());
+                    formData.append('usuario_id', $("#usuario_id").val());
+
+                    if (!$("#documento").val() || !$("#nombre_usuario").val() || !$("#usuario_id").val()) {
                         ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Debe ingresar un número de documento válido y seleccionar un usuario', '');
                         return false;
                     }
 
-                    requisitos("POST",
-                        "../../../peticiones_json/panel_central/productos/productos_json.php",
-                        "opcion=AccionActualizar&id=" + id + "&nombre=" + nombre +"&numero_placa=" + numero_placa + "&observacion=" + observacion + "&estado=" + estado_new + "&documento=" + documento + "&usuario_id=" + usuario_id + "&jsonp=?",
-                        function(data) {
+                    $.ajax({
+                        url: "../../../peticiones_json/panel_central/productos/productos_json.php",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: "json",
+                        success: function(data) {
                             if (data["ALERTA"] == 'OK') {
+                                crear.close();
                                 consultas("Productos");
                                 ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Actualizado Con Exito', '');
-                                return true;
                             } else if (data["ALERTA"] == 'ERROR') {
-                                editar.close();
                                 ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
-                                return false;
+                            } else {
+                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error inesperado', '');
                             }
                         },
-                        "",
-                        []
-                    );
+                        error: function(xhr, status, error) {
+                            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error en la petición AJAX: ' + error, '');
+                        }
+                    });
+                    return false; // Siempre retorna false para que el modal no se cierre automáticamente
                 }
             }
         },
@@ -552,6 +589,70 @@ function TBProductos(data) {
                 dataField: 'USUARIO', // Columna con el nombre del usuario
                 caption: 'Cuentadante',
             },
+            {
+    dataField: 'IMAGEN',
+    caption: 'Imagen',
+    cellTemplate: function(container, options) {
+    let src = options.data.IMAGEN;
+    if (src && src !== "Sin imagen" && src !== "No disponible" && src !== null && src !== undefined) {
+        if (!src.startsWith('http') && !src.startsWith('/')) {
+            src = '/' + src;
+        }
+        src = src.replace(/\/{2,}/g, '/');
+        $('<div>')
+            .css({
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%'
+            })
+            .append(
+                $('<img>').attr({
+                    src: src,
+                    alt: 'Imagen',
+                    style: 'cursor:pointer'
+                }).css({
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '20%',
+                    objectFit: 'cover',
+                    border: '2px solid #e0e0e0',
+                    background: '#f8f8f8'
+                }).on('click', function() {
+                    $('#imagenGrande').attr('src', src);
+                    $('#modalImagenGrande').modal('show');
+                })
+            )
+            .appendTo(container);
+        } else {
+            // Espacio reservado para imagen no disponible
+            $('<div>')
+                .css({
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%'
+                })
+                .append(
+                    $('<div>')
+                        .css({
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '20%',
+                            background: '#e0e0e0',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: '#888',
+                            fontSize: '22px',
+                            fontWeight: 'bold'
+                        })
+                        .text('🖼️')
+                )
+                .appendTo(container);
+        }
+    }
+},
             { dataField: '',
                 caption: 'Acciones',
                 cellTemplate: function(container, options) {
@@ -561,6 +662,15 @@ function TBProductos(data) {
                                 Editar
                             </button>
                         </td>`).appendTo(container);
+
+                       $('<button>')
+                .addClass('btn text-white me-0 btn-sm')
+                .css({ backgroundColor: '#FF0000', color: '#ffffff' })
+                .text('Eliminar')
+                .on('click', function() {
+                    Eliminar(options.data.ID);
+                })
+                .appendTo(container);
                     }
                 }
             }
@@ -791,4 +901,4 @@ function cerrarSesion(event) {
     </script>
 </body>
 
-</html> 
+</html>
