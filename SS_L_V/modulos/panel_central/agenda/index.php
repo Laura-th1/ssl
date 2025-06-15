@@ -160,19 +160,22 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                             fecha_fin: fecha_fin,
                             hora_ini: hora_ini,
                             hora_fin: hora_fin,
-                            bloque: $("#bloque").val(),   // Usamos el id correcto
-                            ambiente: $("#ambiente").val(), // Usamos el id correcto
-                            titulacion: $("#titulacion").val() // Usamos el id correcto
+                            bloque: $("#bloque").val(),
+                            ambiente: $("#ambiente").val(),
+                            titulacion: $("#titulacion").val()
                         },
                         dataType: "json",
                         success: function(data) {
                             console.log(data);
                             if (data["ALERTA"] === 'OK') {
-                                consultas("Agenda");
+                                crear.close();
                                 ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Insertado Con Exito', '');
-                                crear.close(); // Cerrar el modal correctamente
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 1200); // Espera 1.2 segundos antes de recargar para mostrar el mensaje
                             } else if (data["ALERTA"] === 'ERROR') {
-                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
+                                // Mostrar alerta personalizada si el ambiente está ocupado
+                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"] || 'El ambiente no está disponible en el rango seleccionado.', '');
                             }
                         },
                         error: function(xhr, status, error) {
@@ -574,12 +577,11 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         caption: 'Hora Fin'
                     },
                     {
-                        dataField: 'BLOQ_DESC',
-                        caption: 'Bloque'
-                    },
-                    {
                         dataField: 'AMBIENTE_DES',
                         caption: 'Ambiente'
+                    },{
+                        dataField: 'BLOQ_DESC',
+                        caption: 'Bloque'
                     },
                     {
                         dataField: 'TITULACION_DESC',
@@ -600,6 +602,11 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                     </button>
                                 </td>`).appendTo(container);
                             }
+                             $('<button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;">Eliminar</button>')
+                .on('click', function() {
+                    Eliminar(options.data.ID);
+                }).appendTo(container);
+        
                         }
                     }
                 ],
@@ -724,7 +731,9 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         console.log("Respuesta del servidor:", data); // Depuración
                         if (data.status === "success") {
                             alert("Datos importados correctamente.");
-                            consultas("Agendamientos"); // Actualizar la tabla
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000); // Recarga la página después de 1 segundo
                         } else {
                             alert("Error al importar los datos: " + data.message);
                         }
@@ -744,6 +753,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     },
     location: 'after'
 }
+
                     ]
                 }
             });
@@ -890,7 +900,19 @@ var importCsvOption = {
     }
 };
         
-             
+         function Eliminar(id){
+            requisitos("POST",
+                        "../../../peticiones_json/panel_central/agenda/agenda_json.php",
+                        "opcion=AccionEliminar&id="+id+"&jsonp=?",
+                        function(data) {
+                            if(data["ALERTA"] == 'OK'){
+                                consultas("Agenda");
+                            }
+                        },
+                        "",
+                        Array()
+                    );
+        }     
       
         function cerrarSesion(event) {
     event.preventDefault();

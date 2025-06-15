@@ -115,7 +115,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $stmt->close();
     $con->close();
     exit;
-} elseif ($_POST['opcion'] == 'AccionActualizar') {
+} elseif ($_POST['opcion'] == 'AccionActualizar') { 
     $id = $_POST["id"];
     $nombre = $_POST["nombre"];
     $estado = $_POST["estado"];

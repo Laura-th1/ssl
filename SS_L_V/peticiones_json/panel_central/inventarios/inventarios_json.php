@@ -168,32 +168,78 @@ if ($_POST['opcion'] == 'AccionConsultar') {
 
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 } elseif ($_POST['opcion'] == 'AccionInsertarInv') {
-    $observacion = $_POST["observacion"];
-    $producto = $_POST["producto"];
-    $id_inv = $_POST["id_inv"];
+    // Sanitizar entradas
+    $observacion = $con->real_escape_string($_POST["observacion"]);
+    $producto_id = (int)$_POST["producto"];
+    $inventario_id = (int)$_POST["id_inv"];
     
+    // 1. Verificar si el producto ya existe en el inventario
+    $consulta_verificacion = "SELECT di.*, p.descripcion, p.numero_placa 
+                            FROM datos_inventario di
+                            JOIN productos p ON di.producto_id = p.id
+                            WHERE di.producto_id = $producto_id
+                            AND di.inventario_id = $inventario_id";
+    
+    $resultado_verificacion = $con->query($consulta_verificacion);
 
-
-    $consulta = "SELECT 
-                            *
-                        FROM datos_inventario
-                        where producto_id = '".$producto."'
-                        and inventario_id = ".$id_inv."";
-    $data_con 				=								$con->query($consulta);
-
-    if($data_con->num_rows == 0){
-        $alerta                     =                   "OK";
-        $mensaje                    =                   "";
-
-        $consulta = "INSERT INTO datos_inventario (inventario_id, producto_id,  observacion, estado, usuario_create, usuario_act, fecha_create, fecha_act)
-                            VALUES (".$id_inv.", ".$producto.",  '".$observacion."', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_DATE)";
-        $data                 =               $con->query($consulta);
-    }else{
-        $alerta                     =                   "ERROR";
-        $mensaje                    =                   "Ya existe este elemento en el inventario.";
+    if($resultado_verificacion->num_rows == 0) {
+        // 2. Insertar nuevo registro
+        $usuario_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 1;
+        
+        $consulta_insert = "INSERT INTO datos_inventario 
+                          (inventario_id, producto_id, observacion, estado, usuario_create, fecha_create, fecha_act)
+                          VALUES ($inventario_id, $producto_id, '$observacion', 1, $usuario_id, NOW(), NOW())";
+        
+        if($con->query($consulta_insert)) {
+            // 3. Obtener datos del producto para la respuesta
+            $consulta_producto = "SELECT descripcion, numero_placa FROM productos WHERE id = $producto_id";
+            $result_producto = $con->query($consulta_producto);
+            $producto = $result_producto->fetch_assoc();
+            
+            $nombre_display = $producto['descripcion'];
+            if(!empty($producto['numero_placa'])) {
+                $nombre_display .= " (Placa: " . $producto['numero_placa'] . ")";
+            }
+            
+            $response = [
+                "ALERTA" => "OK",
+                "MENSAJE" => "Producto registrado exitosamente",
+                "PRODUCTO" => [
+                    "descripcion" => $producto['descripcion'],
+                    "placa" => $producto['numero_placa'],
+                    "display" => $nombre_display
+                ]
+            ];
+        } else {
+            $response = [
+                "ALERTA" => "ERROR",
+                "MENSAJE" => "Error al registrar el producto: " . $con->error
+            ];
+        }
+    } else {
+        // Producto ya existe en el inventario
+        $producto_existente = $resultado_verificacion->fetch_assoc();
+        $nombre_display = $producto_existente['descripcion'];
+        
+        if(!empty($producto_existente['numero_placa'])) {
+            $nombre_display .= " (Placa: " . $producto_existente['numero_placa'] . ")";
+        }
+        
+        $response = [
+            "ALERTA" => "ERROR",
+            "MENSAJE" => "El producto ya existe en este inventario",
+            "PRODUCTO" => [
+                "descripcion" => $producto_existente['descripcion'],
+                "placa" => $producto_existente['numero_placa'],
+                "display" => $nombre_display
+            ]
+        ];
     }
 
-    print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
+    // 4. Devolver respuesta JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
 } elseif ($_POST['opcion'] == 'AccionActualizar') {
     $id = $_POST["inventario_id"];
     $nombre = $_POST["nombre"];
@@ -256,36 +302,34 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $data                 =               $con->query($consulta);
 
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
+
 } elseif ($_POST['opcion'] == "AccionEliminar") {
     $id = $_POST["id"];
     $consulta = "DELETE FROM datos_inventario WHERE id = ".$id;
     $data                 =               $con->query($consulta);
 
     print json_encode(array("ALERTA" => "OK"));
-} elseif ($_POST['opcion'] == 'AccionMoverProducto') {
-    // Mueve un producto de un inventario a otro
-    // El frontend envía id_inventario_producto (ID de datos_inventario)
-    if (!isset($_POST['id_inventario_producto'], $_POST['id_inventario_destino'])) {
-        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Parámetros incompletos para mover producto."]);
-        exit;
+} 
+elseif ($_POST['opcion'] == 'ObtenerProductosParaInventario') {
+    $query = "SELECT id, descripcion, numero_placa 
+             FROM productos 
+             WHERE estado = 1
+             ORDER BY descripcion";
+    
+    $result = $con->query($query);
+    $productos = [];
+    
+    while ($row = $result->fetch_assoc()) {
+        $productos[] = [
+            'id' => $row['id'],
+            'descripcion' => $row['descripcion'],
+            'numero_placa' => $row['numero_placa']
+        ];
     }
-    $id_inventario_producto = $_POST['id_inventario_producto'];
-    $id_inventario_destino = $_POST['id_inventario_destino'];
-
-    // Actualiza el inventario_id del producto en datos_inventario
-    $consulta = "UPDATE datos_inventario SET inventario_id = ?, usuario_act = 1, fecha_act = CURRENT_TIMESTAMP WHERE id = ?";
-    $stmt = $con->prepare($consulta);
-    if ($stmt === false) {
-        error_log("Error al preparar la consulta para mover producto: " . $con->error);
-        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Error interno del servidor al preparar consulta."]);
-        exit;
-    }
-    $stmt->bind_param("ii", $id_inventario_destino, $id_inventario_producto);
-    if ($stmt->execute()) {
-        echo json_encode(["ALERTA" => "OK", "MENSAJE" => "Producto movido correctamente."]);
-    } else {
-        echo json_encode(["ALERTA" => "ERROR", "MENSAJE" => "Error al mover el producto: " . $stmt->error]);
-    }
-    $stmt->close();
+    
+    echo json_encode([
+        'ALERTA' => 'OK',
+        'PRODUCTOS' => $productos
+    ]);
     exit;
 }

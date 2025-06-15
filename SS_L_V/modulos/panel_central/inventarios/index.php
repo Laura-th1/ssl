@@ -122,6 +122,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                 consultas("Inventarios");
                                 ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Dato insertado con éxito.', '');
                                 crear.close(); // Cierra el modal si todo fue bien
+                            
                             } else {
                                 ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
                             }

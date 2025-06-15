@@ -404,8 +404,14 @@ if (!isset($_SESSION['USUARIO'])) {
                                     Editar
                                 </button>
                             </td>`).appendTo(container);
+                                $(`<td>
+                                <button class="btn text-white me-0 btn-sm" style="background-color: #ff0000; color: #ffffff;" onclick="requisitos('POST', '../../../peticiones_json/panel_central/titulaciones/titulaciones_json.php', 'opcion=AccionEliminar&id=${options.data.ID}&jsonp=?', function(data) { if (data['ALERTA'] == 'OK') { consultas('Titulaciones'); ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Eliminado Con Exito', ''); } else { ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data['MENSAJE'], ''); } }, '', Array());"> 
+                                    Eliminar
+                                </button>   
+                            </td>`).appendTo(container);
+                                
                             }
-                        }
+                    },
                 ],
                 showBorders: true,
                 paging: {
@@ -625,6 +631,7 @@ var importCsvOption = {
         input.click();
     }
 };
+
         function cerrarSesion(event) {
     event.preventDefault();
 
@@ -637,6 +644,8 @@ var importCsvOption = {
         })
         .catch(error => console.error("Error cerrando sesión:", error));
 }
+
+
     </script>
 </body>
 

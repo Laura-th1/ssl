@@ -73,7 +73,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     <div id="main-wrapper">
         <header class="topbar">
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
-                <div class="navbar-header">
+                <div class="navbar-header d-flex align-items-center">
                     <a class="navbar-brand" href="../../" style="font-size: 19px;">
                         <img src="../../includes/img/logos/favicon.png" width="60px" height="60px" class="logo-img">
                         <span class="brand-text">Sena Stock</span>
@@ -103,76 +103,139 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
     </ul> 
  </nav>
         </header>
-        <aside class="left-sidebar">
-            <div class="scroll-sidebar">
-                <nav class="sidebar-nav">
-                    <ul id="sidebarnav">
-                        <li>
-                            <a class="waves-effect waves-dark" href="../../" aria-expanded="false">
-                                <i class="fa fa-home"></i>
-                                <span class="hide-menu">Inicio</span>
-                            </a>
-                        </li>
-                        <?php if ($rolPermitido): ?>
+                
+<aside class="left-sidebar" id="sidebarMenu">
+    <div class="scroll-sidebar">
+        <nav class="sidebar-nav">
+            <!-- Botón hamburguesa solo visible en móvil -->
+                     <button class="btn btn-outline-secondary d-lg-none m-2" id="sidebarToggle" style="position:fixed;z-index:1100;top:10px;left:10px;;border:none;">
+                        <img src="../../includes/img/logos/favicon.png" width="60px" height="60px" class="logo-img">
+                        <span class="brand-text">Sena Stock</span>
+                    </button>
+            <ul id="sidebarnav">
+                <li>
+                    <a class="waves-effect waves-dark" href="../../" aria-expanded="false">
+                        <i class="fa fa-home"></i>
+                        <span class="hide-menu">Inicio</span>
+                    </a>
+                </li>
+                <?php if ($rolPermitido): ?>
+                <li>
+                    <a class="waves-effect waves-dark" href="../../modulos/panel_administrativo/" aria-expanded="false">
+                        <i class="fa fa-globe"></i>
+                        <span class="hide-menu">Panel Administrativo</span>
+                    </a>
+                </li>
+                <?php endif; ?>
+                <hr>
+                <li>
+                    <a class="waves-effect waves-dark active" href="./" aria-expanded="false">
+                        <i class="fa fa-home"></i>
+                        <span class="hide-menu">Panel central</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-dark" href="./agenda" aria-expanded="false">
+                        <i class="fa fa-globe"></i>
+                        <span class="hide-menu">Agenda</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-dark" href="./ambientes" aria-expanded="false">
+                        <i class="fa fa-globe"></i>
+                        <span class="hide-menu">Ambientes</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-dark" href="./inventarios" aria-expanded="false">
+                        <i class="fa fa-globe"></i>
+                        <span class="hide-menu">Inventarios</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-dark" href="./productos" aria-expanded="false">
+                        <i class="fa fa-smile-o"></i>
+                        <span class="hide-menu">Articulos</span>
+                    </a>
+                </li>
+                <?php if ($rolPermitido): ?>
+                <li>
+                    <a class="waves-effect waves-dark" href="./bloques" aria-expanded="false">
+                        <i class="fa fa-smile-o"></i>
+                        <span class="hide-menu">Bloques</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-dark" href="./titulaciones" aria-expanded="false">
+                        <i class="fa fa-smile-o"></i>
+                        <span class="hide-menu">Titulaciones</span>
+                    </a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+</aside>
 
-<li>
-    <a class="waves-effect waves-dark" href="../../modulos/panel_administrativo/" aria-expanded="false">
-        <i class="fa fa-globe"></i>
-        <span class="hide-menu">Panel Administrativo</span>
-    </a>
-</li>
-<?php endif; ?>
-                        <hr>
-                        <li>
-                            <a class="waves-effect waves-dark active" href="./" aria-expanded="false">
-                                <i class="fa fa-home"></i>
-                                <span class="hide-menu">Panel central</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="waves-effect waves-dark" href="./agenda" aria-expanded="false">
-                                <i class="fa fa-globe"></i>
-                                <span class="hide-menu">Agenda</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="waves-effect waves-dark" href="./ambientes" aria-expanded="false">
-                                <i class="fa fa-globe"></i>
-                                <span class="hide-menu">Ambientes</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="waves-effect waves-dark" href="./inventarios" aria-expanded="false">
-                            <i class="fa fa-globe"></i>
-                                <span class="hide-menu">Inventarios</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="waves-effect waves-dark" href="./productos" aria-expanded="false">
-                                <i class="fa fa-smile-o"></i>
-                                <span class="hide-menu">Articulos</span>
-                            </a>
-                        </li>
-                        <?php if ($rolPermitido): ?>
+<style>
+    @media (max-width: 991.98px) {
+    .navbar-brand {
+        display: none !important;
+    }
+}
+/* Responsive sidebar */
+@media (max-width: 991.98px) {
+    .left-sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background: #fff;
+        z-index: 1050;
+        border: none;
+        transition: left 0.3s;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    }
+    .left-sidebar.active {
+        left: 0;
+    }
+    .page-wrapper {
+        margin-left: 0 !important;
+    }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var sidebar = document.getElementById('sidebarMenu');
+    var toggle = document.getElementById('sidebarToggle');
+    var isSidebarOpen = false;
 
-<li>
-    <a class="waves-effect waves-dark" href="./bloques" aria-expanded="false">
-        <i class="fa fa-smile-o"></i>
-        <span class="hide-menu">Bloques</span>
-    </a>
-</li>
-<li>
-    <a class="waves-effect waves-dark" href="./titulaciones" aria-expanded="false">
-        <i class="fa fa-smile-o"></i>
-        <span class="hide-menu">Titulaciones</span>
-    </a>
-</li>
-<?php endif; ?>
+    if(toggle && sidebar){
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation(); // Evita que el click cierre el menú inmediatamente
+            sidebar.classList.toggle('active');
+            isSidebarOpen = sidebar.classList.contains('active');
+        });
 
-                    </ul>
-                </nav>
-            </div>
-        </aside>
+        // Cierra el sidebar al hacer clic fuera en móvil
+        document.addEventListener('click', function(e) {
+            if(window.innerWidth < 992 && sidebar.classList.contains('active')) {
+                // Si el click NO es dentro del sidebar ni en el botón
+                if(!sidebar.contains(e.target) && e.target !== toggle) {
+                    sidebar.classList.remove('active');
+                    isSidebarOpen = false;
+                }
+            }
+        });
+
+        // Evita que los clicks dentro del sidebar cierren el menú
+        sidebar.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+});
+</script>
         <div class="page-wrapper">
             <div class="container-fluid">
                 <div class="row page-titles">
@@ -204,7 +267,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
         }
     </style>
                         <body>
-                         <a  class="saludo"><span>👋</span> Bienvenid@, <?php echo $_SESSION['NOMBRE_COMPLETO']; ?> <span>👋</span></a>
+                         <a  class="saludo"><span>👋</span> BIENVENID@, <?php echo $_SESSION['NOMBRE_COMPLETO']; ?> <span>👋</span></a>
                         </body>
                     </div>
                 </div>

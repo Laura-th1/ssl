@@ -263,13 +263,6 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-12" id="div_numero_placa">
-                                            <div class="form-group">
-                                                <label for="numero_placa">N° de Placa:</label>
-                                                <input type="text" class="form-control text-dark bg-white" id="numero_placa" name="numero_placa" placeholder="N° de Placa" required />
-                                                <input type="hidden" id="producto_id" name="producto_id" />
-                                             </div>
-                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="observacion">Observación:</label>
@@ -279,45 +272,108 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                                     </div>
                                 </form>
                             </div>`,
-                buttons: {
+         buttons: {
                     cancelar: {
                         text: 'Cancelar',
                         btnClass: 'btn btn-danger',
                         action: function(ModalCerrar){
                         }
                     },
-                    guardar: {
-                        text: 'Guardar',
-                        btnClass: 'btn btn-green',
-                        action: function(saveButton){
-                            var observacion = $("#observacion").val();
-                            
-                            requisitos("POST",
-                                "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                                "opcion=AccionInsertarInv&id_inv="+id_inventario+"&observacion="+observacion+"&producto=" + $("#producto").val()+ "&jsonp=?",
-                                function(data) {
-                                    if (data["ALERTA"] == 'OK') {
-                                        consultas("Inventario");
-                                        ModalNotifi('col-md-4 col-md-offset-4', 'Notificacion', 'Dato Insertado Con Exito', '');
-                                        return true;
-                                    } else if (data["ALERTA"] == 'ERROR') {
-                                        crear.close();
-                                        CrearNueva();
-                                        ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
-                                        return false;
-                                    }
-                                },
-                                "",
-                                Array()
+            guardar: {
+                text: 'Guardar',
+                btnClass: 'btn btn-green',
+                action: function(saveButton){
+                    var observacion = $("#observacion").val();
+                    var productoId = $("#producto").val();
+                    
+                    if (!productoId) {
+                        $.alert('Debe seleccionar un producto');
+                        return false;
+                    }
+                    
+                    $.ajax({
+                        url: "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            opcion: "AccionInsertarInv",
+                            id_inv: id_inventario,
+                            observacion: observacion,
+                            producto: productoId
+                        },
+                        success: function(response) {
+                            if (response.ALERTA === "OK") {
+                                // Mostrar mensaje con información del producto
+                                var mensaje = `Producto registrado:<br>
+                                              <strong>${response.PRODUCTO.display}</strong>`;
+                                
+                                ModalNotifi(
+                                    'col-md-4 col-md-offset-4', 
+                                    'Éxito', 
+                                    mensaje, 
+                                    'green'
+                                );
+                                
+                                consultas("Inventario");
+                                crear.close();
+                            } else {
+                                // Mostrar error con detalles del producto
+                                var mensajeError = `${response.MENSAJE}:<br>
+                                                  <strong>${response.PRODUCTO.display}</strong>`;
+                                
+                                ModalNotifi(
+                                    'col-md-4 col-md-offset-4', 
+                                    'Error', 
+                                    mensajeError, 
+                                    'red'
+                                );
+                            }
+                        },
+                        error: function() {
+                            ModalNotifi(
+                                'col-md-4 col-md-offset-4', 
+                                'Error', 
+                                'Error de conexión con el servidor', 
+                                'red'
                             );
                         }
+                    });
+                    return false; // Evitar cierre automático
+                }
+            }
+        },
+        onContentReady: function() {
+            // Cargar productos con placas
+            $.ajax({
+                url: "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
+                type: "POST",
+                data: { opcion: "ObtenerProductosParaInventario" },
+                dataType: "json",
+                success: function(data) {
+                    var $select = $("#producto");
+                    $select.empty().append('<option value="">Seleccione un producto</option>');
+                    
+                    if (data.ALERTA === "OK") {
+                        $.each(data.PRODUCTOS, function(i, producto) {
+                            var texto = producto.descripcion;
+                            if (producto.numero_placa) {
+                                texto += " (Placa: " + producto.numero_placa + ")";
+                            }
+                            
+                            $select.append(
+                                $('<option>', {
+                                    value: producto.id,
+                                    text: texto,
+                                    'data-placa': producto.numero_placa || ''
+                                })
+                            );
+                        });
                     }
-                },
-                onContentReady: function (){
-                    consultas("productos");
                 }
             });
         }
+    });
+}
 
         function Editar(id, observacion) {
             editar = $.confirm({
@@ -378,296 +434,224 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
             });
         }
 
- // New function to handle moving an item
-        function MoverArticulo(Producto_id, currentInvId) {
-            $.confirm({
-                title: 'Mover Artículo',
-                content: `<div class="form-group">
-                              <label for="destinoInventario">Seleccione el inventario de destino:</label>
-                              <select class="form-control text-dark bg-white" id="destinoInventario"></select>
-                          </div>`,
-                buttons: {
-                    cancel: {
-                        text: 'Cancelar',
-                        btnClass: 'btn-danger'
-                    },
-                    move: {
-                        text: 'Mover',
-                        btnClass: 'btn-success',
-                        action: function() {
-                            var destinoInventarioId = $('#destinoInventario').val();
-                            if (destinoInventarioId) {
-                                if (destinoInventarioId == currentInvId) {
-                                    ModalNotifi('col-md-4 col-md-offset-4', 'Advertencia', 'El artículo ya se encuentra en este inventario.', '');
-                                    return false;
-                                }
-                                requisitos("POST",
-                                    "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                                    "opcion=AccionMoverProducto&id_producto=" + Producto_id + "&id_inventario_destino=" + destinoInventarioId + "&jsonp=?",
-                                    function(data) {
-                                        if (data["ALERTA"] == 'OK') {
-                                            consultas("Inventario"); // Refresh the current inventory
-                                            ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Artículo movido con éxito', '');
-                                        } else {
-                                            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], '');
-                                        }
-                                    },
-                                    "",
-                                    Array()
-                                );
-                            } else {
-                                ModalNotifi('col-md-4 col-md-offset-4', 'Advertencia', 'Debe seleccionar un inventario de destino.', '');
-                                return false; // Prevent closing the modal
-                            }
-                        }
-                    }
-                },
-                onContentReady: function() {
-                    var jc = this;
-                    // Populate the dropdown with available inventories (excluding the current one)
-                    requisitos("POST",
-                        "../../../../peticiones_json/panel_central/inventarios/inventarios_json.php",
-                        "opcion=AccionConsultar&accion=ConsultarTodosExceptoUno&id_inv_excluir=" + currentInvId + "&jsonp=?",
-                        function(data) {
-                            if (data["ALERTA"] == 'OK') {
-                                $.each(data["DATA"], function(index, inventario) {
-                                   $('#destinoInventario').append($('<option></option>').val(inventario.ID).text(inventario.NOMBRE_INVENTARIO));
-                                });
-                            } else {
-                                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Error al cargar inventarios: ' + data["MENSAJE"], '');
-                                jc.close();
-                            }
-                        },
-                        "",
-                        Array()
-                    );
-                }
-            });
-        }
-
-
-        function TBInventario(data) {
-            tabla_datos_inventario = $("#tablaInventario").dxDataGrid({
-                dataSource: data["DATA"],
-                columns: [{
-                    caption: 'N°',
-                        dataField: 'NUMERO',
-                        width: 100
-                    },
-                    {
-                        caption: 'Articulo',
-                        dataField: 'PROD_DES',
-                    },
-                    {
-                        caption: 'Observacion',
-                        dataField: 'OBSERVACION',
-                    },{
-                        caption: 'Nº de Placa', 
-                        dataField: 'NUM_PLAC', 
-                    },
-                     {
-                        caption: 'Cuentadante', 
-                        dataField: 'USUARIO', 
-                     },{
-                        dataField: '',
-                        caption: 'Acciones',
-                        cellTemplate: function(container, options) {
-    if (rolPermitido) {
-        $('<button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;">Editar</button>')
-            .on('click', function() {
-                Editar(options.data.ID, options.data.OBSERVACION);
-            }).appendTo(container);
-
-        $('<button class="btn text-white me-0 btn-sm" style="background-color: #007bff; color: #ffffff;">Mover</button>')
-            .on('click', function() {
-                MoverArticulo(options.data.ID, id_inventario);
-            }).appendTo(container);
-
-        $('<button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;">Eliminar</button>')
-            .on('click', function() {
-                Eliminar(options.data.ID);
-            }).appendTo(container);
-    }
-                    }
-                    }
-                ], 
-                showBorders: true,
-                paging: {
-                    enabled: true,
-                    pageSize: 20
-                },
-                searchPanel: {
-                    visible: true,
-                    width: 240,
-                    placeholder: 'Buscar...'
-                },
-                headerFilter: {
-                    visible: true
-                },
-                groupPanel: {
-                    visible: false
-                },
-                loadPanel: {
-                    enabled: true
-                },
-                filterRow: {
-                    visible: true,
-                    applyFilter: 'auto'
-                },
-                export: {
-                    enabled: true,
-                    fileName: 'Inventarios',
-                    allowExportSelectedData: true,
-                    texts: {
-                        exportAll: 'Exportar todo',
-                        exportSelectedRows: 'Exportar filas seleccionadas'
-                    }
-                },
-                selection: {
-                    mode: 'multiple',
-                    showCheckBoxesMode: 'always'
-                },
-                editing: {
-                    mode: 'row',
-                    allowUpdating: false,
-                    allowAdding: false,
-                    allowDeleting: false
-                },
-                toolbar: {
-                    items: [{
-                            widget: 'dxButton',
-                            options: {
-                                icon: 'exportxlsx',
-                                text: 'Exportar a Excel',
-                                onClick: function() {
-                                    const grid = $("#tablaInventario").dxDataGrid("instance");
-                                    const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Inventarios');
-
-                                    DevExpress.excelExporter.exportDataGrid({
-                                        component: grid,
-                                        worksheet: worksheet
-                                    }).then(() => {
-                                        workbook.xlsx.writeBuffer().then(buffer => {
-                                            saveAs(new Blob([buffer], {
-                                                type: 'application/octet-stream'
-                                            }), 'Inventarios.xlsx');
-                                        });
-                                    });
-                                }
-                            },
-                            location: 'after'
+            function TBInventario(data) {
+                tabla_datos_inventario = $("#tablaInventario").dxDataGrid({
+                    dataSource: data["DATA"],
+                    keyExpr: "ID", // Mantener el ID de datos_inventario como clave principal
+                    columns: [{
+                        caption: 'N°',
+                            dataField: 'NUMERO',
+                            width: 100
                         },
                         {
-                            widget: 'dxButton',
-                            options: {
-                                icon: 'export',
-                                text: 'Exportar a CSV',
-                                onClick: function() {
-                                    const grid = $("#tablaInventario").dxDataGrid("instance");
-                                    const workbook = new ExcelJS.Workbook();
-                                    const worksheet = workbook.addWorksheet('Inventarios');
-
-                                    DevExpress.excelExporter.exportDataGrid({
-                                        component: grid,
-                                        worksheet: worksheet
-                                    }).then(() => {
-                                        workbook.csv.writeBuffer().then(buffer => {
-                                            saveAs(new Blob([buffer], {
-                                                type: 'text/csv'
-                                            }), 'Inventarios.csv');
-                                        });
-                                    });
-                                }
-                            },
-                            location: 'after'
+                            caption: 'Articulo',
+                            dataField: 'PROD_DES',
+                        },
+                        {
+                            caption: 'Observacion',
+                            dataField: 'OBSERVACION',
                         },{
-    widget: 'dxButton',
-    options: {
-        icon: 'upload',
-        text: 'Importar CSV',
-        onClick: function() {
-            // Crear un input para seleccionar el archivo CSV
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv';
+                            caption: 'Nº de Placa', 
+                            dataField: 'NUM_PLAC', 
+                        },
+                        {
+                            caption: 'Cuentadante', 
+                            dataField: 'USUARIO', 
+                        },{
+                            dataField: '',
+                            caption: 'Acciones',
+                            cellTemplate: function(container, options) {
+        if (rolPermitido) {
+            $('<button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;">Editar</button>')
+                .on('click', function() {
+                    Editar(options.data.ID, options.data.OBSERVACION);
+                }).appendTo(container);
 
-            // Evento para manejar el archivo seleccionado
-            input.addEventListener('change', function(event) {
-                const file = event.target.files[0]; // Obtener el archivo seleccionado
-
-                if (file) {
-                    const formData = new FormData();
-                    formData.append('csv_file', file); // Use 'csv_file' here
-                    formData.append('import_data', true);
-
-                    // Enviar el archivo al servidor
-                    fetch("../../../../peticiones_json/panel_central/inventarios/import.php", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Respuesta del servidor:", data); // Depuración
-                        if (data.status === "success") {
-                            alert("Datos importados correctamente.");
-                            consultas("Inventarios"); // Actualizar la tabla
-                            
-                            return true;
-                        } else {
-                            alert("Error al importar los datos: " + data.message);
-                            return false;
-
+            $('<button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;">Eliminar</button>')
+                .on('click', function() {
+                    Eliminar(options.data.ID);
+                }).appendTo(container);
+        }
                         }
-                    })
-                    .catch(error => {
-                        console.error("Error al enviar datos:", error);
-                        location.reload(); // Recargar la página
-                    });
-                } else {
-                    alert("No se seleccionó ningún archivo.");
-                }
-            });
-            
+                        }
+                    ], 
+                    showBorders: true,
+                    paging: {
+                        enabled: true,
+                        pageSize: 20
+                    },
+                    searchPanel: {
+                        visible: true,
+                        width: 240,
+                        placeholder: 'Buscar...'
+                    },
+                    headerFilter: {
+                        visible: true
+                    },
+                    groupPanel: {
+                        visible: false
+                    },
+                    loadPanel: {
+                        enabled: true
+                    },
+                    filterRow: {
+                        visible: true,
+                        applyFilter: 'auto'
+                    },
+                    export: {
+                        enabled: true,
+                        fileName: 'Inventarios',
+                        allowExportSelectedData: true,
+                        texts: {
+                            exportAll: 'Exportar todo',
+                            exportSelectedRows: 'Exportar filas seleccionadas'
+                        }
+                    },
+                    selection: {
+                        mode: 'multiple',
+                        showCheckBoxesMode: 'always'
+                    },
+                    editing: {
+                        mode: 'row',
+                        allowUpdating: false,
+                        allowAdding: false,
+                        allowDeleting: false
+                    },
+                    toolbar: {
+                        items: [{
+                                widget: 'dxButton',
+                                options: {
+                                    icon: 'exportxlsx',
+                                    text: 'Exportar a Excel',
+                                    onClick: function() {
+                                        const grid = $("#tablaInventario").dxDataGrid("instance");
+                                        const workbook = new ExcelJS.Workbook();
+                                        const worksheet = workbook.addWorksheet('Inventarios');
 
-            // Simular un clic para abrir el selector de archivos
-            input.click();
-        }
-    },
-    location: 'after'
-}
+                                        DevExpress.excelExporter.exportDataGrid({
+                                            component: grid,
+                                            worksheet: worksheet
+                                        }).then(() => {
+                                            workbook.xlsx.writeBuffer().then(buffer => {
+                                                saveAs(new Blob([buffer], {
+                                                    type: 'application/octet-stream'
+                                                }), 'Inventarios.xlsx');
+                                            });
+                                        });
+                                    }
+                                },
+                                location: 'after'
+                            },
+                            {
+                                widget: 'dxButton',
+                                options: {
+                                    icon: 'export',
+                                    text: 'Exportar a CSV',
+                                    onClick: function() {
+                                        const grid = $("#tablaInventario").dxDataGrid("instance");
+                                        const workbook = new ExcelJS.Workbook();
+                                        const worksheet = workbook.addWorksheet('Inventarios');
 
-                    ]
-                }
-            });
-        }
-        function contarArticulosFiltrados(dataArray) {
-    const conteo = {};
+                                        DevExpress.excelExporter.exportDataGrid({
+                                            component: grid,
+                                            worksheet: worksheet
+                                        }).then(() => {
+                                            workbook.csv.writeBuffer().then(buffer => {
+                                                saveAs(new Blob([buffer], {
+                                                    type: 'text/csv'
+                                                }), 'Inventarios.csv');
+                                            });
+                                        });
+                                    }
+                                },
+                                location: 'after'
+                            },{
+        widget: 'dxButton',
+        options: {
+            icon: 'upload',
+            text: 'Importar CSV',
+            onClick: function() {
+                // Crear un input para seleccionar el archivo CSV
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
 
-    dataArray.forEach(row => {
-        const nombre = row.PROD_DES;
-        if (nombre) {
-            conteo[nombre] = (conteo[nombre] || 0) + 1;
-        }
-    });
+                // Evento para manejar el archivo seleccionado
+                input.addEventListener('change', function(event) {
+                    const file = event.target.files[0]; // Obtener el archivo seleccionado
 
-    const totalContainer = document.getElementById("totalProductos");
-    if (totalContainer) {
-        totalContainer.innerHTML = ""; // Limpiar antes de agregar
+                    if (file) {
+                        const formData = new FormData();
+                        formData.append('csv_file', file); // Use 'csv_file' here
+                        formData.append('import_data', true);
 
-        for (const [producto, cantidad] of Object.entries(conteo)) {
-            const item = document.createElement("div");
-            item.className = "producto";
-            item.innerHTML = `<strong>${producto}</strong>: ${cantidad}` + " articulo(s)";
-            item.style.backgroundColor = "#f0f0f0"; // Color de fondo claro
-            totalContainer.appendChild(item);
-        }
+                        // Enviar el archivo al servidor
+                        fetch("../../../../peticiones_json/panel_central/inventarios/import.php", {
+                            method: "POST",
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Respuesta del servidor:", data); // Depuración
+                            if (data.status === "success") {
+                                alert("Datos importados correctamente.");
+                                consultas("Inventarios"); // Actualizar la tabla
+                                
+                                return true;
+                            } else {
+                                alert("Error al importar los datos: " + data.message);
+                                return false;
 
-        if (Object.keys(conteo).length === 0) {
-            totalContainer.innerHTML = `<div class="producto">No hay articulos registrados</div>`;
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error al enviar datos:", error);
+                            location.reload(); // Recargar la página
+                        });
+                    } else {
+                        alert("No se seleccionó ningún archivo.");
+                    }
+                });
+                
+
+                // Simular un clic para abrir el selector de archivos
+                input.click();
+            }
+        },
+        location: 'after'
+    }
+
+                        ]
+                    }
+                });
+            }
+            function contarArticulosFiltrados(dataArray) {
+        const conteo = {};
+
+        dataArray.forEach(row => {
+            const nombre = row.PROD_DES;
+            if (nombre) {
+                conteo[nombre] = (conteo[nombre] || 0) + 1;
+            }
+        });
+
+        const totalContainer = document.getElementById("totalProductos");
+        if (totalContainer) {
+            totalContainer.innerHTML = ""; // Limpiar antes de agregar
+
+            for (const [producto, cantidad] of Object.entries(conteo)) {
+                const item = document.createElement("div");
+                item.className = "producto";
+                item.innerHTML = `<strong>${producto}</strong>: ${cantidad}` + " articulo(s)";
+                item.style.backgroundColor = "#f0f0f0"; // Color de fondo claro
+                totalContainer.appendChild(item);
+            }
+
+            if (Object.keys(conteo).length === 0) {
+                totalContainer.innerHTML = `<div class="producto">No hay articulos registrados</div>`;
+            }
         }
     }
-}
 
 
 

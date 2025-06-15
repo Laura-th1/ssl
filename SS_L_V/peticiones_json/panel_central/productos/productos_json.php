@@ -135,5 +135,33 @@ function guardarImagen($inputName = 'imagen') {
     }
     return $rutaFinal;
 }
+if ($_POST['opcion'] == "AccionEliminar") {
+    $id = intval($_POST["id"]);
+    $alerta = "OK";
+    $mensaje = "";
+
+    // Corregir la tabla y la consulta: 
+    $consulta = $con->prepare("DELETE FROM productos WHERE id = ?");
+    if ($consulta) {
+        $consulta->bind_param("i", $id);
+        if ($consulta->execute()) {
+            if ($consulta->affected_rows > 0) {
+                $mensaje = "Eliminado correctamente.";
+            } else {
+                $alerta = "ERROR";
+                $mensaje = "No se encontró el producto para eliminar.";
+            }
+        } else {
+            $alerta = "ERROR";
+            $mensaje = "Error al ejecutar la eliminación.";
+        }
+        $consulta->close();
+    } else {
+        $alerta = "ERROR";
+        $mensaje = "Error en la preparación de la consulta.";
+    }
+
+    print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
+} 
 
 ?>

@@ -180,14 +180,17 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     $ambiente = $_POST["ambiente"];
     $titulacion = $_POST["titulacion"];
 
+    // Validación de traslape de fechas y horas al crear
     $consulta = "SELECT *
-                        FROM agenda_ambientes
-                        WHERE fecha = '" . $fecha . "'
-                        AND fecha_fin = '" . $fecha_fin . "'
-                        AND hora_ini >= '" . $hora_ini . "'
-                        AND hora_fin <= '" . $hora_fin . "'
-                        AND bloque_id = " . $bloque . "
-                        AND ambiente_id = " . $ambiente . "";
+        FROM agenda_ambientes
+        WHERE bloque_id = $bloque
+        AND ambiente_id = $ambiente
+        AND (
+            (fecha <= '$fecha_fin' AND fecha_fin >= '$fecha')
+        )
+        AND (
+            (hora_ini < '$hora_fin' AND hora_fin > '$hora_ini')
+        )";
     $data_con = $con->query($consulta);
 
     if ($data_con->num_rows == 0) {
@@ -199,7 +202,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $data = $con->query($consulta);
     } else {
         $alerta = "ERROR";
-        $mensaje = "Ya está ocupado a esta hora el ambiente.";
+        $mensaje = "Ya está ocupado el ambiente en el rango de fechas y horas seleccionado.";
     }
 
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
@@ -218,13 +221,21 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $ambiente = $_POST["ambiente"];
         $titulacion = $_POST["titulacion"];
 
-        $consulta = $con->prepare("SELECT * FROM agenda_ambientes
-            WHERE fecha = ? AND  fecha_fin = ? AND hora_ini >= ? AND hora_fin <= ? AND bloque_id = ? AND ambiente_id = ? AND id <> ?");
-        $consulta->bind_param("ssssii", $fecha, $fecha_fin, $hora_ini, $hora_fin, $bloque, $ambiente, $id);
-        $consulta->execute();
-        $resultado = $consulta->get_result();
+        // Validación de traslape de fechas y horas al actualizar (excluyendo el registro actual)
+        $consulta = "SELECT *
+            FROM agenda_ambientes
+            WHERE bloque_id = $bloque
+            AND ambiente_id = $ambiente
+            AND id <> $id
+            AND (
+                (fecha <= '$fecha_fin' AND fecha_fin >= '$fecha')
+            )
+            AND (
+                (hora_ini < '$hora_fin' AND hora_fin > '$hora_ini')
+            )";
+        $data_con = $con->query($consulta);
 
-        if ($resultado->num_rows == 0) {
+        if ($data_con->num_rows == 0) {
             // Si no hay conflictos de horarios, proceder con la actualización
             $alerta = "OK";
             $mensaje = "";
@@ -232,7 +243,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
             $consulta_update = $con->prepare("UPDATE agenda_ambientes
                 SET fecha = ?,fecha_fin = ?, hora_ini = ?, hora_fin = ?, ambiente_id = ?, titulacion_id = ?, estado = ?, bloque_id = ?, usuario_act = 1, fecha_act = CURRENT_TIMESTAMP
                 WHERE id = ?");
-            $consulta_update->bind_param("ssssiiii", $fecha, $fecha_fin, $hora_ini, $hora_fin, $ambiente, $titulacion, $estado, $bloque, $id);
+            $consulta_update->bind_param("ssssiiiii", $fecha, $fecha_fin, $hora_ini, $hora_fin, $ambiente, $titulacion, $estado, $bloque, $id);
             $consulta_update->execute();
 
             if ($consulta_update->affected_rows > 0) {
@@ -243,7 +254,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
             }
         } else {
             $alerta = "ERROR";
-            $mensaje = "Ya está ocupado a esta hora el ambiente.";
+            $mensaje = "Ya está ocupado el ambiente en el rango de fechas y horas seleccionado.";
         }
 
         print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
@@ -252,5 +263,32 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         $mensaje = "Faltan datos necesarios para procesar la solicitud.";
         print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
     }
-}
+} elseif ($_POST['opcion'] == "AccionEliminar") {
+    $id = intval($_POST["id"]);
+    $alerta = "OK";
+    $mensaje = "";
+
+    // Corregir la tabla y la consulta: debe ser agenda_ambientes, no datos_inventario
+    $consulta = $con->prepare("DELETE FROM agenda_ambientes WHERE id = ?");
+    if ($consulta) {
+        $consulta->bind_param("i", $id);
+        if ($consulta->execute()) {
+            if ($consulta->affected_rows > 0) {
+                $mensaje = "Eliminado correctamente.";
+            } else {
+                $alerta = "ERROR";
+                $mensaje = "No se encontró el agendamiento para eliminar.";
+            }
+        } else {
+            $alerta = "ERROR";
+            $mensaje = "Error al ejecutar la eliminación.";
+        }
+        $consulta->close();
+    } else {
+        $alerta = "ERROR";
+        $mensaje = "Error en la preparación de la consulta.";
+    }
+
+    print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
+} 
 ?>

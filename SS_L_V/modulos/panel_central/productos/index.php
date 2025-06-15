@@ -658,20 +658,16 @@ function TBProductos(data) {
                 cellTemplate: function(container, options) {
                     if (rolPermitido) {
                         $(`<td>
-                            <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.DESCRIPCION}', '${options.data.NUMERO_PLACA}', '${options.data.OBSERVACION}', ${options.data.ESTADO_INT}, '${options.data.DOCUMENTO || ''}', '${options.data.USUARIO}', ${options.data.USUARIO_ID || 0});"> 
+                            <button class="btn text-white me-0 btn-sm" style="background-color: #39a900; color: #ffffff;" onclick="Editar(${options.data.ID}, '${options.data.DESCRIPCION}', '${options.data.NUMERO_PLACA}', '${options.data.OBSERVACION}', '${options.data.IMAGEN}',${options.data.ESTADO_INT}, '${options.data.DOCUMENTO || ''}', '${options.data.USUARIO}', ${options.data.USUARIO_ID || 0});"> 
                                 Editar
                             </button>
                         </td>`).appendTo(container);
 
-                       $('<button>')
-                .addClass('btn text-white me-0 btn-sm')
-                .css({ backgroundColor: '#FF0000', color: '#ffffff' })
-                .text('Eliminar')
-                .on('click', function() {
-                    Eliminar(options.data.ID);
-                })
-                .appendTo(container);
-                    }
+                      $('<button class="btn text-white me-0 btn-sm" style="background-color: #FF0000; color: #ffffff;">Eliminar</button>')
+            .on('click', function() {
+                Eliminar(options.data.ID);
+            }).appendTo(container);
+    }
                 }
             }
         ],
@@ -897,6 +893,20 @@ function cerrarSesion(event) {
         .catch(error => console.error("Error cerrando sesión:", error));
 }
 
+function Eliminar(id){
+            requisitos("POST",
+                        "../../../peticiones_json/panel_central/productos/productos_json.php",
+                        "opcion=AccionEliminar&id="+id+"&jsonp=?",
+                        function(data) {
+                            if(data["ALERTA"] == 'OK'){
+                                consultas("productos");
+                                  location.reload(); // Recarga la página al eliminar
+                            }
+                        },
+                        "",
+                        Array()
+                    );
+        }
 
     </script>
 </body>
