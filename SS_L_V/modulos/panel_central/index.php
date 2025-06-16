@@ -58,10 +58,58 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     
-    
+<style>
+        .custom-navbar-toggler {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            z-index: 2000;
+            background: #fff;
+            border: none;
+            border-radius: 25%;
+            padding: 6px 8px;
+            color: #39a900;
+            font-size: 1.7rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            display: none;
+            transition: background 0.2s;
+        }
+        .custom-navbar-toggler:active,
+        .custom-navbar-toggler:focus {
+            background: #e6ffe6;
+            outline: none;
+        }
+        @media (max-width: 768px) {
+            .custom-navbar-toggler {
+                display: block;
+            }
+            .navbar-header {
+                margin-left: 40px !important;
+            }
+            .topbar {
+                position: relative;
+                min-height: 56px;
+            }
+            .navbar-brand {
+                display: none !important;
+            }
+        }
+        @media (max-width: 800px) {
+            .navbar-header {
+                padding-left: 40px;
+            }
+        }
+    </style>
 </head>
 
+
 <body class="fix-header fix-sidebar card-no-border">
+    <!-- Botón hamburguesa solo visible en móvil -->
+                     <button class="btn btn-outline-secondary d-lg-none m-2" id="sidebarToggle" style="position:fixed;z-index:1100;top:10px;left:10px;;border:none;">
+                        <img src="../../includes/img/logos/favicon.png"   width="35" height="35" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                       <path fill-rule="evenodd" d="M2.5 12.5a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5z"/>
+                       </img>
+                    </button>
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
@@ -107,11 +155,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 <aside class="left-sidebar" id="sidebarMenu">
     <div class="scroll-sidebar">
         <nav class="sidebar-nav">
-            <!-- Botón hamburguesa solo visible en móvil -->
-                     <button class="btn btn-outline-secondary d-lg-none m-2" id="sidebarToggle" style="position:fixed;z-index:1100;top:10px;left:10px;;border:none;">
-                        <img src="../../includes/img/logos/favicon.png" width="60px" height="60px" class="logo-img">
-                        <span class="brand-text">Sena Stock</span>
-                    </button>
+            
             <ul id="sidebarnav">
                 <li>
                     <a class="waves-effect waves-dark" href="../../" aria-expanded="false">

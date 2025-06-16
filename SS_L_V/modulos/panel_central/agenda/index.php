@@ -212,17 +212,56 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
 <script>
     var rolPermitido = <?php echo json_encode($rolPermitido); ?>;
 </script>
+<style>
+        .custom-navbar-toggler {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            z-index: 2000;
+            background: #fff;
+            border: none;
+            border-radius: 25%;
+            padding: 6px 8px;
+            color: #39a900;
+            font-size: 1.7rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            display: none;
+            transition: background 0.2s;
+        }
+        .custom-navbar-toggler:active,
+        .custom-navbar-toggler:focus {
+            background: #e6ffe6;
+            outline: none;
+        }
+        @media (max-width: 768px) {
+            .custom-navbar-toggler {
+                display: block;
+            }
+            .navbar-header {
+                margin-left: 40px !important;
+            }
+            .topbar {
+                position: relative;
+                min-height: 56px;
+            }
+            .navbar-brand {
+                display: none !important;
+            }
+        }
+        @media (max-width: 800px) {
+            .navbar-header {
+                padding-left: 40px;
+            }
+        }
+    </style>
 </head>
-
 <body class="fix-header fix-sidebar card-no-border">
-    <div class="preloader">
-        <div class="loader">
-            <div class="loader__figure"></div>
-            <p class="loader__label">Sena Stock</p>
-        </div>
-    </div>
-
-
+    <!-- Botón menú hamburguesa-->
+    <button class="custom-navbar-toggler" type="button" onclick="document.body.classList.toggle('show-sidebar')" aria-label="Menú">
+        <img src="../../../includes/img/logos/favicon.png"   width="40" height="40" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M2.5 12.5a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1h-10a.5.5 0 0 1-.5-.5z"/>
+    </img>
+    </button>
     <div id="main-wrapper">
         <header class="topbar">
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
