@@ -254,6 +254,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
             }
         }
     </style>
+    
 </head>
 <body class="fix-header fix-sidebar card-no-border">
     <!-- Botón menú hamburguesa-->

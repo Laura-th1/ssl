@@ -86,6 +86,52 @@ $rolPermitido1 = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrad
             <p class="loader__label">Sena Stock</p>
         </div>
     </div>
+    <!-- Botón menú hamburguesa -->
+<button class="custom-navbar-toggler" type="button" onclick="document.body.classList.toggle('show-sidebar')" aria-label="Menú">
+    <img src="../../../includes/img/logos/favicon.png" width="40" height="40" alt="Menú">
+</button>
+<style>
+        .custom-navbar-toggler {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            z-index: 2000;
+            background: #fff;
+            border: none;
+            border-radius: 25%;
+            padding: 6px 8px;
+            color: #39a900;
+            font-size: 1.7rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            display: none;
+            transition: background 0.2s;
+        }
+        .custom-navbar-toggler:active,
+        .custom-navbar-toggler:focus {
+            background: #e6ffe6;
+            outline: none;
+        }
+        @media (max-width: 768px) {
+            .custom-navbar-toggler {
+                display: block;
+            }
+            .navbar-header {
+                margin-left: 40px !important;
+            }
+            .topbar {
+                position: relative;
+                min-height: 56px;
+            }
+            .navbar-brand {
+                display: none !important;
+            }
+        }
+        @media (max-width: 800px) {
+            .navbar-header {
+                padding-left: 40px;
+            }
+        }
+    </style>
 
 
     <div id="main-wrapper">
