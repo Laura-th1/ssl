@@ -148,7 +148,7 @@ $rolPermitido = in_array($_SESSION['ROL'], ['Coordinador', 'Apoyo Tecnológico',
                         <?php if ($rolPermitido): ?>
 
 <li>
-    <a class="waves-effect waves-dark" href="../../../modulos/panel_administrativo/" aria-expanded="false">
+    <a class="waves-effect waves-dark" href="../../../panel_administrativo/" aria-expanded="false">
         <i class="fa fa-globe"></i>
         <span class="hide-menu">Panel Administrativo</span>
     </a>
