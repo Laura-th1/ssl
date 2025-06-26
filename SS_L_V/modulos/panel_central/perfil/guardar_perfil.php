@@ -1,4 +1,25 @@
 <?php 
+/**
+ * guardar_perfil.php - Guardar cambios de perfil de usuario | Sena Stock
+ * ----------------------------------------------------------------------
+ * Este archivo procesa el formulario de edición de perfil del usuario autenticado.
+ * Permite actualizar nombre, correo, usuario y foto de perfil en la base de datos.
+ * Si se sube una nueva foto, la almacena en la carpeta correspondiente.
+ * Actualiza también los datos en la sesión.
+ * 
+ * Entradas:
+ *   - POST: id_usuario, nombre, correo, usuario
+ *   - FILES: foto (opcional)
+ * 
+ * Salidas:
+ *   - Redirección a perfil.php con mensaje de éxito o muestra errores en pantalla.
+ * 
+ * Tecnologías: PHP, MySQLi, HTML5.
+ * 
+ * Autor: [Tu Nombre o Equipo]
+ * Fecha: [Fecha de creación o última modificación]
+ */
+
 session_start();
 
 require_once '../../../includes/conexiones/Base_Datos/conexion.php';
@@ -44,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($foto && $foto['tmp_name']) {
             $target_dir = "../../../includes/img/usuarios/";
             $target_file = $target_dir . basename($foto['name']);
+            // Mueve la foto subida al directorio de usuarios
             if (move_uploaded_file($foto['tmp_name'], $target_file)) {
                 echo "Foto subida correctamente: " . htmlspecialchars($target_file) . "<br>";
             } else {
@@ -64,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "Foto: " . htmlspecialchars($target_file) . "<br>";
         echo "ID: " . htmlspecialchars($id) . "<br>";
 
-        // Actualizar los datos en la base de datos
+        // Actualizar los datos en la base de datos usando prepared statements
         $sql = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, usuario = ?, foto = ? WHERE id = ?";
         $stmt = $con->prepare($sql);
 
@@ -72,11 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             die("Error al preparar la consulta: " . $con->error);
         }
 
+        // Asigna los parámetros a la consulta preparada
         $stmt->bind_param("sssssi", $nombre, $apellido, $email, $usuario, $target_file, $id);
 
+        // Ejecuta la consulta y verifica el resultado
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
-                echo "Perfil actualizado correctamente en la base de datos.<br>";
+                // Perfil actualizado correctamente en la base de datos.
 
                 // Actualizar los datos en la sesión
                 $_SESSION['NOMBRE_COMPLETO'] = trim($nombre . " " . $apellido);

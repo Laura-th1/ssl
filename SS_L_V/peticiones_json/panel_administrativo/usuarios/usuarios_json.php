@@ -1,4 +1,17 @@
 <?php
+/**
+ * Archivo: usuarios_json.php (Peticiones JSON - Módulo de Usuarios)
+ * Descripción: Este archivo gestiona las peticiones AJAX relacionadas con la administración de usuarios
+ * en el panel administrativo de Sena Stock. Permite consultar, insertar, eliminar y cambiar el estado
+ * de los usuarios, así como obtener información auxiliar (tipos de documento, sexos, roles).
+ * 
+ * Manual del programador:
+ * - Todas las operaciones se realizan vía POST y retornan respuestas en formato JSON.
+ * - El archivo es consumido por el frontend (DevExtreme DataGrid y formularios AJAX).
+ * - Incluye integración con PHPMailer para el envío de correos al crear usuarios.
+ * - El backend relevante para la administración de usuarios está centralizado aquí.
+ */
+
 header('Content-Type: application/json');
 include_once("../../../includes/conexiones/Base_Datos/conexion.php");
 use PHPMailer\PHPMailer\PHPMailer;
@@ -7,51 +20,46 @@ use PHPMailer\PHPMailer\Exception;
 require '../../../vendor/phpmailer/phpmailer/src/Exception.php';
 require '../../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
 require '../../../vendor/phpmailer/phpmailer/src/SMTP.php';
-$function_name                 =                     $_POST['jsonp'];
-$con                        =                   conectar();
-$alerta                     =                   "";
-$mensaje                    =                   "";
+
+// Solo asigna $function_name si existe el índice 'jsonp' en $_POST
+$function_name = isset($_POST['jsonp']) ? $_POST['jsonp'] : null;
+
+$con = conectar();
+$alerta = "";
+$mensaje = "";
 
 
 
-
-// Función para cambiar el estado del usuario
+// Función para cambiar el estado del usuario (habilitar/deshabilitar)
 if ($_POST['opcion'] == 'AccionCambiarEstado') {
     $id = intval($_POST['id']);
     $estado = intval($_POST['estado']);
 
-    // Prepara la consulta SQL de forma segura usando placeholders (?)
     $consulta = "UPDATE usuarios SET estado = ? WHERE id = ?";
-
-    // Crea una sentencia preparada
     $stmt = $con->prepare($consulta);
 
-    // Verifica si la preparación de la sentencia falló
     if ($stmt === false) {
-        // Registra el error para depuración (no muestres errores internos directamente al usuario en producción)
         error_log("Error al preparar la consulta para AccionCambiarEstado: " . $con->error);
         print json_encode(array("ALERTA" => "ERROR", "MENSAJE" => "Error interno del servidor al procesar la solicitud."));
-    } else {
-        // Vincula los parámetros a los placeholders
-        // "ii" significa que ambos parámetros son enteros (integer)
-        $stmt->bind_param("ii", $estado, $id);
+        exit;
+    }
 
-        // Ejecuta la sentencia preparada
-        $data = $stmt->execute();
+    $stmt->bind_param("ii", $estado, $id);
+    $data = $stmt->execute();
 
-        if ($data) {
-            print json_encode(array("ALERTA" => "OK"));
-        } else {
-            // Obtiene el error de la ejecución de la sentencia
-            error_log("Error al ejecutar la consulta para AccionCambiarEstado: " . $stmt->error);
-            print json_encode(array("ALERTA" => "ERROR", "MENSAJE" => "Error al actualizar el estado del usuario: " . $stmt->error));
-        }
-
-        // Cierra la sentencia
+    if ($data) {
+        print json_encode(array("ALERTA" => "OK"));
         $stmt->close();
+        exit;
+    } else {
+        error_log("Error al ejecutar la consulta para AccionCambiarEstado: " . $stmt->error);
+        print json_encode(array("ALERTA" => "ERROR", "MENSAJE" => "Error al actualizar el estado del usuario: " . $stmt->error));
+        $stmt->close();
+        exit;
     }
 }
 
+// Consulta de usuarios y datos auxiliares (tipos de documento, sexos, roles)
 if ($_POST['opcion'] == 'AccionConsultar') {
     if ($_POST['accion'] == 'ConsultarTodos') {
 
@@ -178,6 +186,7 @@ if ($_POST['opcion'] == 'AccionConsultar') {
         print json_encode(array("DATA" => $data));
     }
 } elseif ($_POST['opcion'] == 'AccionInsertar') {
+    // Inserción de usuario y envío de correo con PHPMailer
     error_log("Datos recibidos en AccionInsertar: " . print_r($_POST, true));
     $tipo_documento_id = $_POST['tp_documento'];
     $numero_documento = $_POST['numero_documento'];
@@ -288,15 +297,14 @@ if ($_POST['opcion'] == 'AccionConsultar') {
     }
 
     print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
-}elseif ($_POST['opcion'] == 'AccionEliminar') {
-$consulta = "DELETE FROM usuarios WHERE id =".$_POST["id"];
-$data                 =               $con->query($consulta);
-$alerta                     =                   "OK";
-$mensaje                    =                   "";
-print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
+} elseif ($_POST['opcion'] == 'AccionEliminar') {
+    // Eliminación de usuario
+    $consulta = "DELETE FROM usuarios WHERE id =".$_POST["id"];
+    $data                 =               $con->query($consulta);
+    $alerta                     =                   "OK";
+    $mensaje                    =                   "";
+    print json_encode(array("ALERTA" => $alerta, "MENSAJE" => $mensaje));
 }
 
-
 //fin 
-
 ?>

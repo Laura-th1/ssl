@@ -1,5 +1,18 @@
-
 <?php
+/**
+ * index.php - Página principal | Sena Stock
+ * ---------------------------------------------------------------
+ * Este archivo es la página de inicio del sistema Sena Stock.
+ * Controla el acceso de usuarios autenticados, muestra la navegación principal,
+ * y presenta información sobre los servicios, contacto y propósito del sistema.
+ * Incluye lógica para mostrar opciones según el rol del usuario y permite cerrar sesión.
+ * 
+ * Tecnologías: PHP, Bootstrap, jQuery, EmailJS, HTML5.
+ * 
+ * Autor: [Tu Nombre o Equipo]
+ * Fecha: [Fecha de creación o última modificación]
+ */
+
 session_start();
 
 if (!isset($_SESSION['USUARIO'])) {
@@ -31,12 +44,18 @@ if (!isset($_SESSION['ROL'])) {
     }
 }
 
-// Verifica si el rol del usuario está permitido
+// Determina si el usuario tiene un rol permitido para acceder a ciertas funciones
 $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrador']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <!--
+            Sección de cabecera:
+            - Metadatos para SEO y responsive
+            - Inclusión de hojas de estilo y librerías externas (Bootstrap, FontAwesome, etc.)
+            - Estilos personalizados para la página de inicio
+        -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
@@ -60,6 +79,11 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
         </div> -->
 
         <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
+            <!--
+                Barra de navegación principal:
+                - Muestra enlaces según el estado de autenticación y rol del usuario
+                - Incluye menú de usuario con acceso a perfil y cierre de sesión
+            -->
             <div class="container px-4 px-lg-5">
                 <a class="navbar-brand" href="./">Sena Stock</a>
                 <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,6 +130,9 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
         </nav>
 
         <header class="masthead">
+            <!--
+                Slider de imágenes y presentación principal del sistema
+            -->
             <div class="slider">
                 <div class="slide" style="background-image: url('./includes/img/home/home1.jpeg');"></div>
                 <div class="slide" style="background-image: url('./includes/img/home/home2.jpg');"></div>
@@ -127,6 +154,9 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
         </header>
         
         <section class="page-section" id="services">
+            <!--
+                Sección de servicios ofrecidos por el sistema
+            -->
             <div class="container px-4 px-lg-5">
                 <h2 class="text-center mt-0">Servicios que ofrecemos</h2>
                 <hr class="divider" />
@@ -164,6 +194,9 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
             </div>
         </section>
         <section class="page-section bg-sena-contact" id="contact">
+            <!--
+                Sección de contacto con formulario integrado usando EmailJS
+            -->
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-lg-8 col-xl-6 text-center">
@@ -219,6 +252,9 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
 
 
         <section class="page-section" id="about">
+            <!--
+                Sección "Acerca de" con video y descripción del sistema
+            -->
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 align-items-center">
                     <div class="col-lg-6">
@@ -230,10 +266,10 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
                         </div>
                     </div>
                     <div class="col-lg-6">
-                        <h2 class="mt-0  text-center">Acerca de SENA Stock</h2>
+                        <h2 class="mt-0  text-center">Acerca de SENA STOCK</h2>
                         <hr class="divider" />
                         <p class="text-muted mb-4">
-                            A través de SENA Stock, los usuarios tienen acceso a funcionalidades como el registro de entradas y salidas, actualización de inventarios y generación de reportes detallados. Esto ayuda a garantizar la transparencia en la administración de los recursos y permite una toma de decisiones informada sobre la reposición, mantenimiento y distribución de los activos.
+                            A través de SENA STOCK, los usuarios tienen acceso a funcionalidades como el registro de entradas y salidas, actualización de inventarios y generación de reportes detallados. Esto ayuda a garantizar la transparencia en la administración de los recursos y permite una toma de decisiones informada sobre la reposición, mantenimiento y distribución de los activos.
                         </p>
                         <p class="text-muted mb-4">
                             Nuestro objetivo es facilitar una experiencia de gestión intuitiva, rápida y eficiente, alineada con los valores de sostenibilidad y responsabilidad del SENA. Con SENA Stock, buscamos que los ambientes de formación estén siempre preparados para proporcionar una educación de calidad, con recursos bien gestionados y disponibles para quienes más los necesitan.
@@ -248,24 +284,26 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
         <footer class="bg-sena py-5">
             <div class="container px-4 px-lg-5">
                 <div class="small text-center text-white">
-                    Copyright &copy; 2024 - Sena Stock
+                    Copyright &copy; 2025 - SENA STOCK - DEV SLR
                 </div>
             </div>
         </footer>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
-     <script src="./includes/librerias/jquery_3.7.1/jquery.min.js"></script>
+        <script src="./includes/librerias/jquery_3.7.1/jquery.min.js"></script>
         <script src="./includes/js/global/scripts.js"></script>
         <script src="./includes/librerias/jquery-confirm/js/jquery-confirm.min.js"></script>
-        
-<script type="text/javascript"
-  src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<script type="text/javascript">
-  emailjs.init('kLtMWNCJwbYzL1-PZ')
-</script>
+        <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+        <script type="text/javascript">
+            emailjs.init('kLtMWNCJwbYzL1-PZ')
+        </script>
 
         <script>
+        /**
+         * Lógica para el formulario de contacto usando EmailJS.
+         * Valida el mensaje, muestra mensajes de éxito/error y envía el formulario.
+         */
           document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("contactForm");
     const btn = document.getElementById("submitButton");
@@ -351,23 +389,24 @@ $rolPermitido = in_array($_SESSION['ROL'], [ 'Apoyo Tecnológico', 'Administrado
             // });
 
             
-function cerrarSesion() {
-    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-        // Enviar la solicitud para cerrar sesión
-        fetch("./modulos/panel_central/perfil/logout.php", { // Enviar la solicitud a la misma página
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "cerrar_sesion=1"
-        })
-        .then(() => {
-            window.location.href = "../SS_L_V/index.php"; // Redirigir al login
-        })
-        .catch(error => console.error("Error:", error));
-    }
-}
-
-
-
-		</script>
+/**
+         * Función para cerrar sesión del usuario.
+         * Realiza una petición POST a logout.php y redirige al login.
+         */
+        function cerrarSesion() {
+            if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                // Enviar la solicitud para cerrar sesión
+                fetch("./modulos/panel_central/perfil/logout.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "cerrar_sesion=1"
+                })
+                .then(() => {
+                    window.location.href = "../SS_L_V/index.php"; // Redirigir al login
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        }
+        </script>
     </body>
 </html>

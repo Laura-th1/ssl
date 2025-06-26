@@ -1,4 +1,17 @@
 <?php
+/**
+ * Archivo: index.php (Módulo de Usuarios - Panel Administrativo)
+ * Descripción: Este archivo genera la interfaz de administración de usuarios del sistema Sena Stock.
+ * Permite visualizar, crear, habilitar/deshabilitar y eliminar usuarios mediante una tabla interactiva DevExtreme.
+ * Incluye controles de sesión, carga de datos vía AJAX y manejo de acciones sobre los usuarios.
+ * 
+ * - El frontend utiliza jQuery, DevExtreme DataGrid y Bootstrap.
+ * - Las acciones de la tabla (crear, eliminar, cambiar estado) se comunican con el backend PHP por AJAX.
+ * - El backend relevante está en peticiones_json/panel_administrativo/usuarios/usuarios_json.php.
+ * - El diseño es responsive y soporta scroll horizontal para tablas anchas.
+ */
+
+// Inicia la sesión y verifica autenticación
 session_start();
 
 if (!isset($_SESSION['USUARIO'])) {
@@ -196,10 +209,8 @@ if (!isset($_SESSION['USUARIO'])) {
                                     <div class="row">
                                         <div class="col-sm-12">
                                             <div class="table-responsive">
-                                                 
+                                                <!-- Contenedor de la tabla de usuarios -->
                                                 <div id="tablaUsuarios"></div>
-                                                
-                                                
                                             </div>
                                         </div>
                                     </div>
@@ -213,6 +224,7 @@ if (!isset($_SESSION['USUARIO'])) {
         </div>
     </div>
 
+    <!-- Inclusión de librerías JS necesarias para la funcionalidad de la página -->
     <script src="../../../includes/librerias/jquery_3.7.1/jquery.min.js"></script>
     <script src="../../../includes/librerias/bootstrap_5.3.0/js/bootstrap.min.js"></script>
     <script src="../../../includes/librerias/bootstrap_5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -238,16 +250,18 @@ if (!isset($_SESSION['USUARIO'])) {
 
 
     <script type="text/javascript">
+        // Variables globales para modales y tabla
         var crear;
         var editar;
-
         var tabla_datos_usuarios;
 
+        // Al cargar la página, consulta y pinta la tabla de usuarios
         $(document).ready(function() {
             consultas("Usuarios");
         });
 
-       
+        // Función para mostrar el modal de creación de usuario
+        // Realiza petición AJAX para insertar usuario y recarga la tabla al éxito
         function CrearNueva() {
             crear = $.confirm({
                     title: 'Crear Nuevo Usuario',
@@ -406,6 +420,7 @@ if (!isset($_SESSION['USUARIO'])) {
             });
         }
 
+        // Función para eliminar un usuario (petición AJAX)
         function Eliminar(id) {
             requisitos("POST",
                     "../../../peticiones_json/panel_administrativo/usuarios/usuarios_json.php",
@@ -427,6 +442,8 @@ if (!isset($_SESSION['USUARIO'])) {
                 );
         }
 
+        // Función que inicializa la tabla DevExtreme con los datos recibidos
+        // Define columnas, acciones y botones personalizados
         function TBUsuarios(data) {
             tabla_datos_usuarios = $("#tablaUsuarios").dxDataGrid({
                 dataSource: data["DATA"],
@@ -483,17 +500,24 @@ if (!isset($_SESSION['USUARIO'])) {
         let texto = esActivo ? 'Deshabilitar' : 'Habilitar';
         let color = esActivo ? '#67757c' : '#39a900';
 
+        // Crea un div flex para alinear los botones horizontalmente y evitar que uno tape al otro
+        var $btnGroup = $('<div>').css({
+            display: 'flex',
+            gap: '6px',
+            'flex-wrap': 'wrap'
+        });
+
         // Botón para cambiar estado
         $('<button>')
-            .addClass('btn text-white me-2 btn-sm')
+            .addClass('btn text-white btn-sm')
             .css('background-color', color)
             .text(texto)
             .on('click', function () {
                 cambiarEstado(options.data.ID, esActivo ? 0 : 1);
             })
-            .appendTo(container);
+            .appendTo($btnGroup);
 
-        // Botón de eliminar 
+        // Botón de eliminar
         $('<button>')
             .addClass('btn text-white btn-sm')
             .css('background-color', '#ff0000')
@@ -501,7 +525,10 @@ if (!isset($_SESSION['USUARIO'])) {
             .on('click', function () {
                 Eliminar(options.data.ID);
             })
-            .appendTo(container);
+            .appendTo($btnGroup);
+
+        // Limpia el contenedor y agrega el grupo de botones
+        $(container).empty().append($btnGroup);
     }
 }
                     
@@ -603,6 +630,7 @@ if (!isset($_SESSION['USUARIO'])) {
             });
         }
 
+        // Función para consultar datos según la acción (usuarios, roles, sexos, etc.)
         function consultas(accion) {
             if (accion == 'Usuarios') {
                 requisitos("POST",
@@ -653,37 +681,49 @@ if (!isset($_SESSION['USUARIO'])) {
             }
         }
         // La función JavaScript para cambiar el estado de un usuario
-function cambiarEstado(id, nuevoEstado) {
-    $.ajax({
-        url: "../../../peticiones_json/panel_administrativo/usuarios/usuarios_json.php", // La URL a tu script PHP
-        type: "POST", // Método HTTP para enviar los datos
-        data: { // Datos que se envían al servidor
-            opcion: "AccionCambiarEstado", // Indica al PHP qué acción realizar
-            id: id,                       // El ID del usuario
-            estado: nuevoEstado           // El nuevo estado
-        },
-        dataType: "json", // Tipo de dato esperado en la respuesta del servidor (JSON)
-        success: function(data) {
-            console.log("Respuesta:", data); // Para depurar: muestra la respuesta del servidor en la consola
+        function cambiarEstado(id, nuevoEstado) {
+            // Deshabilita todos los botones de acciones mientras se procesa la petición
+            $(".dx-datagrid .btn").prop("disabled", true);
 
-            if (data["ALERTA"] === 'OK') {
-                // Si la operación fue exitosa en el servidor
-                ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Estado actualizado con éxito', ''); // Muestra una notificación de éxito
-
-                // Recarga solo la tabla DevExtreme sin refrescar toda la página
-                $("#tablaUsuarios").dxDataGrid("instance").refresh();
-            } else {
-                // Si hubo un error reportado por el servidor
-                ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', data["MENSAJE"], ''); // Muestra una notificación de error con el mensaje del servidor
-            }
-        },
-        error: function(xhr, status, error) {
-            // Si la petición AJAX falla (ej. problema de red, URL incorrecta, error de servidor no capturado por el success)
-            console.error("Error en la petición AJAX:", error); // Muestra el error técnico en la consola
-            ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', 'Hubo un problema de comunicación con el servidor.', ''); // Muestra un mensaje de error genérico al usuario
+            $.ajax({
+                url: "../../../peticiones_json/panel_administrativo/usuarios/usuarios_json.php",
+                type: "POST",
+                data: {
+                    opcion: "AccionCambiarEstado",
+                    id: id,
+                    estado: nuevoEstado
+                },
+                dataType: "json",
+                success: function(data) {
+                    if (data && data["ALERTA"] === 'OK') {
+                        ModalNotifi('col-md-4 col-md-offset-4', 'Notificación', 'Estado actualizado con éxito', '');
+                    } else {
+                        let mensaje = (data && data["MENSAJE"]) ? data["MENSAJE"] : "Respuesta inesperada del servidor.";
+                        ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', mensaje, '');
+                    }
+                    // Forzar recarga de datos desde el servidor, no solo refresh visual
+                    consultas("Usuarios");
+                },
+                error: function(xhr, status, error) {
+                    let mensaje = "Hubo un problema de comunicación con el servidor.";
+                    if (xhr && xhr.responseText) {
+                        try {
+                            let resp = JSON.parse(xhr.responseText);
+                            if (resp && resp.MENSAJE) mensaje = resp.MENSAJE;
+                        } catch(e) {
+                            mensaje = xhr.responseText;
+                        }
+                    }
+                    console.error("Error en la petición AJAX:", error, mensaje);
+                    ModalNotifi('col-md-4 col-md-offset-4', 'ERROR', mensaje, '');
+                    consultas("Usuarios");
+                },
+                complete: function() {
+                    // Rehabilita los botones después de la petición
+                    $(".dx-datagrid .btn").prop("disabled", false);
+                }
+            });
         }
-    });
-}
 
 
     function cerrarSesion(event) {
@@ -699,6 +739,38 @@ function cambiarEstado(id, nuevoEstado) {
         .catch(error => console.error("Error cerrando sesión:", error));
 } 
     </script>
+    <style>
+        /* Estilos para scroll horizontal y visibilidad de botones en la tabla */
+        .table-responsive {
+            overflow-x: auto;
+        width: 100%;
+        min-width: 0;
+        padding-bottom: 1px;
+        }
+        #tablaUsuarios {
+            min-width: 1400px !important; /* Aumenta el ancho mínimo para asegurar visibilidad */
+        }
+        .dx-datagrid .dx-row > td:last-child,
+        .dx-datagrid .dx-row > td[data-column-index]:last-child {
+            min-width: 220px !important; /* Más espacio para los botones */
+            white-space: nowrap;
+        }
+        .dx-datagrid .btn {
+            margin-bottom: 4px;
+            min-width: 90px;
+        }
+        /* Ajuste para pantallas pequeñas: scroll horizontal */
+        @media (max-width: 1600px) {
+            #tablaUsuarios {
+                min-width: 1200px !important;
+            }
+        }
+        @media (max-width: 1200px) {
+            #tablaUsuarios {
+                min-width: 900px !important;
+            }
+        }
+    </style>
 </body>
 
 </html>

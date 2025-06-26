@@ -1,6 +1,18 @@
-
-
 <?php
+/**
+ * perfil.php - Perfil de Usuario | Sena Stock
+ * ---------------------------------------------------------------
+ * Este archivo muestra la información del perfil del usuario autenticado,
+ * incluyendo nombre, correo, usuario, rol y foto de perfil.
+ * Permite acceder a la edición del perfil y al restablecimiento de contraseña.
+ * El usuario debe estar autenticado para acceder a esta página.
+ * 
+ * Tecnologías: PHP, Bootstrap, jQuery, HTML5.
+ * 
+ * Autor: [Tu Nombre o Equipo]
+ * Fecha: [Fecha de creación o última modificación]
+ */
+
 session_start();
 
 if (!isset($_SESSION['USUARIO'])) {
@@ -38,6 +50,7 @@ if (!isset($_SESSION['USUARIO'])) {
 </head>
 
 <body class="fix-header fix-sidebar card-no-border">
+    <!-- Preloader animado mientras carga la página -->
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
@@ -49,6 +62,7 @@ if (!isset($_SESSION['USUARIO'])) {
     <img src="../../../includes/img/logos/favicon.png" width="40" height="40" alt="Menú">
 </button>
 <style>
+        /* Estilos para el botón hamburguesa y ajustes responsive */
         .custom-navbar-toggler {
             position: fixed;
             top: 8px;
@@ -94,6 +108,7 @@ if (!isset($_SESSION['USUARIO'])) {
 
 
     <div id="main-wrapper">
+        <!-- Barra superior de navegación -->
         <header class="topbar">
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
                 <div class="navbar-header">
@@ -125,6 +140,7 @@ if (!isset($_SESSION['USUARIO'])) {
             </nav>
             </nav>
         </header>
+        <!-- Menú lateral izquierdo (sidebar) -->
         <aside class="left-sidebar">
             <div class="scroll-sidebar">
                 <nav class="sidebar-nav">
@@ -194,11 +210,12 @@ if (!isset($_SESSION['USUARIO'])) {
                 </nav>
             </div>
         </aside>
+        <!-- Contenido principal de la página -->
         <div class="page-wrapper">
             <div class="container-fluid">
                 <div class="row page-titles">
                     <div class="col-md-5 align-self-center">
-                        <h3 class="text-themecolor">Perfil</h3>
+                        <h3 class="text-themecolor">PERFIL</h3>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="../">Home</a></li>
                             <li class="breadcrumb-item active">Perfil</li>
@@ -250,10 +267,11 @@ if (!isset($_SESSION['USUARIO'])) {
                     </div>
                 </div>
             </div>
-            <footer class="footer"> © <?php echo date('Y'); ?> - Sena Stock </footer>
+            <footer class="footer"> © 2025 SENA STOCK - DEV SLR </a> </footer>
         </div>
     </div>
 
+    <!-- Inclusión de scripts JS y librerías necesarias para la funcionalidad -->
     <script src="../../../includes/librerias/jquery_3.7.1/jquery.min.js"></script>
     <script src="../../../includes/librerias/bootstrap_5.3.0/js/bootstrap.min.js"></script>
     <script src="../../../includes/librerias/bootstrap_5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -265,7 +283,7 @@ if (!isset($_SESSION['USUARIO'])) {
     <script src="../../../includes/js/panel_administrativo/waves.js"></script>
     <script src="../../../includes/js/panel_administrativo/sidebarmenu.js"></script>
     <script src="../../../includes/js/panel_administrativo/custom.js"></script>
-    <!-- <script src="../../../includes/js/panel_administrativo/dashboard.js"></script> -->
+    
     <script src="../../../includes/librerias/jquery-confirm/js/jquery-confirm.min.js"></script>
 
     <script src="https://cdn3.devexpress.com/jslib/21.2.3/js/dx.all.js"></script>
@@ -277,7 +295,10 @@ if (!isset($_SESSION['USUARIO'])) {
 </body>
 
 <script>
-    
+/**
+ * Función para cerrar sesión del usuario.
+ * Realiza una petición POST a logout.php y redirige al login.
+ */
 function cerrarSesion() {
     if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
         // Enviar la solicitud para cerrar sesión
@@ -292,7 +313,6 @@ function cerrarSesion() {
         .catch(error => console.error("Error:", error));
     }
 }
-
 </script>
 
 </html>

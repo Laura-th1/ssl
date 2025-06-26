@@ -206,7 +206,7 @@ session_start();
                 <div class="row">
                 </div>
             </div>
-            <footer class="footer"> © 2021 Adminwrap by <a href="https://www.wrappixel.com/">wrappixel.com</a> </footer>
+            <footer class="footer"> © 2025 SENA STOCK - DEV SLR </a> </footer>
         </div>
     </div>
     <script>

@@ -96,29 +96,7 @@ function CreacionTablasBD()
                                 );";
     $data                 =               $con->query($creacion_bd_roles);
 
-    // $creacion_bd_departamentos = "CREATE TABLE departamentos (
-    //                                     id                      INT AUTO_INCREMENT PRIMARY KEY,
-    //                                     descripcion             VARCHAR(255) NOT NULL,
-    //                                     estado                  TINYINT NOT NULL DEFAULT 1,
-    //                                     usuario_create          VARCHAR(50) NOT NULL,
-    //                                     usuario_act             VARCHAR(50),
-    //                                     fecha_create            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    //                                     fecha_act               TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    //                                 );";
-    // $data                 =               $con->query($creacion_bd_departamentos);
-
-    // $creacion_bd_municipios = "CREATE TABLE municipios (
-    //                                     id                      INT AUTO_INCREMENT PRIMARY KEY,
-    //                                     id_departamento         INT NOT NULL,
-    //                                     descripcion             VARCHAR(255) NOT NULL,
-    //                                     estado                  TINYINT NOT NULL DEFAULT 1,
-    //                                     usuario_create          VARCHAR(50) NOT NULL,
-    //                                     usuario_act             VARCHAR(50),
-    //                                     fecha_create            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    //                                     fecha_act               TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    //                                 );";
-    // $data                 =               $con->query($creacion_bd_municipios);
-
+ 
     $creacion_bd_productos = "CREATE TABLE productos (
                                 id                      INT AUTO_INCREMENT PRIMARY KEY,
                                 descripcion             VARCHAR(255) NOT NULL,
